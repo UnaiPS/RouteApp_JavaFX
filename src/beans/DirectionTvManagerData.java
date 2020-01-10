@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package routeapp_javafx.view;
+package beans;
 
 import java.util.ArrayList;
 import java.util.Collection;

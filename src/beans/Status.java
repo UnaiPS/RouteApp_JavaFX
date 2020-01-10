@@ -1,4 +1,4 @@
-package routeapp_javafx.logic;
+package beans;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -7,16 +7,16 @@ package routeapp_javafx.logic;
  */
 
 /**
- * Type of privilege the user is going to have.
+ * Status of the user.
  * @author Daira Eguzkiza Lamelas
  */
-public enum Privilege {
+public enum Status {
     /**
-     * Determines that the user is a normal user without admin privileges.
+     * Determines if the user is enabled.
      */
-    USER,
+    ENABLED,
     /**
-     * Determines that the user is an administrator.
+     * Determines if the user is disabled.
      */
-    ADMIN
+    DISABLED
 }

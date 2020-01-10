@@ -3,14 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package routeapp_javafx.view;
-
-import java.util.Collection;
+package beans;
 
 /**
  *
  * @author 2dam
  */
-public interface DirectionTvManager {
-    public Collection getAllDirections();
+public enum Type {
+    WAYPOINT,ORIGIN,DESTINATION,GPS
 }

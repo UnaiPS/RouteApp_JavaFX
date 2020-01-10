@@ -5,7 +5,6 @@
  */
 package routeapp_javafx.logic;
 
-import java.util.List;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
@@ -35,9 +34,9 @@ public class UserRESTClient {
         webTarget = client.target(BASE_URI).path("routeappjpa.user");
     }
 
-    public <T> T forgottenpasswd(Class<T> responseType, String email) throws ClientErrorException {
+    public <T> T forgottenpasswd(Class<T> responseType, String email, String login) throws ClientErrorException {
         WebTarget resource = webTarget;
-        resource = resource.path(java.text.MessageFormat.format("forgottenpasswd/{0}", new Object[]{email}));
+        resource = resource.path(java.text.MessageFormat.format("forgottenpasswd/{0}/{1}", new Object[]{email, login}));
         return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
     }
 
@@ -69,7 +68,7 @@ public class UserRESTClient {
         return webTarget.path("login").request(javax.ws.rs.core.MediaType.APPLICATION_XML).post(javax.ws.rs.client.Entity.entity(requestEntity, javax.ws.rs.core.MediaType.APPLICATION_XML), responseType);
     }
 
-    public <T> T findAll(Class<T> responseType) throws ClientErrorException {
+    public <T> T findAll(GenericType<T> responseType) throws ClientErrorException {
         WebTarget resource = webTarget;
         return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
     }

@@ -5,6 +5,8 @@
  */
 package routeapp_javafx.logic;
 
+import beans.User;
+import beans.Direction;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -14,7 +16,8 @@ import java.util.List;
  * @author Daira Eguzkiza
  */
 public interface Client {
-    public Direction getDirection(String direction);
-    public List<User> getDeliveryUsers();
+    public Direction getDirection(String direction) throws LogicBusinessException;
+    public List<User> getDeliveryUsers() throws LogicBusinessException;
+    public int restorePassword(String email, String login) throws LogicBusinessException;
     
 }

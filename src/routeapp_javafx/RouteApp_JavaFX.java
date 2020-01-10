@@ -12,7 +12,9 @@ import javafx.scene.Parent;
 import javafx.stage.Stage;
 import routeapp_javafx.logic.Client;
 import routeapp_javafx.logic.ClientFactory;
+import routeapp_javafx.view.FXMLDocumentAssignRouteController;
 import routeapp_javafx.view.FXMLDocumentCreateRouteController;
+import routeapp_javafx.view.FXMLDocumentRestorePasswordController;
 
 /**
  *
@@ -22,9 +24,13 @@ public class RouteApp_JavaFX extends Application {
     
     @Override
     public void start(Stage stage) throws IOException  {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("view/CreateRoute.fxml"));
+            //FXMLLoader loader = new FXMLLoader(getClass().getResource("view/CreateRoute.fxml"));
+            //FXMLLoader loader = new FXMLLoader(getClass().getResource("view/AssignRoute.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("view/RestorePassword.fxml"));
             Parent root = (Parent) loader.load();
-            FXMLDocumentCreateRouteController viewController = loader.getController();
+            //FXMLDocumentCreateRouteController viewController = loader.getController();
+            //FXMLDocumentAssignRouteController viewController = loader.getController();
+            FXMLDocumentRestorePasswordController viewController = loader.getController();
             Client client = ClientFactory.getClient();
             viewController.setClient(client);
             viewController.setStage(stage);

@@ -5,6 +5,8 @@
  */
 package routeapp_javafx.view;
 
+import beans.DirectionTvBean;
+import beans.DirectionTvManager;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -35,12 +37,15 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.util.StringConverter;
 import routeapp_javafx.logic.Client;
-import routeapp_javafx.logic.Direction;
-import routeapp_javafx.logic.Mode;
-import routeapp_javafx.logic.Route;
-import routeapp_javafx.logic.TrafficMode;
-import routeapp_javafx.logic.TransportMode;
-import routeapp_javafx.logic.User;
+import beans.Direction;
+import beans.Mode;
+import beans.Route;
+import beans.TrafficMode;
+import beans.TransportMode;
+import beans.User;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import routeapp_javafx.logic.LogicBusinessException;
 
 /**
  *
@@ -149,16 +154,20 @@ public class FXMLDocumentCreateRouteController {
      */
     @FXML
     private void handleOriginButtonAction(ActionEvent event){
-        Direction e = this.cliente.getDirection(tfOrigin.getText());
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "");
-        alert.setTitle("Origin");
-        alert.setHeaderText("Is this the direction you want?: " + e.getName());
-        
-        Optional<ButtonType> okButton = alert.showAndWait();
-        if (okButton.isPresent() && okButton.get() == ButtonType.CANCEL) {    
-            //nada
-        }else{
-            tfOriginInfo.setText(e.getName());
+        try {
+            Direction e = this.cliente.getDirection(tfOrigin.getText());
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "");
+            alert.setTitle("Origin");
+            alert.setHeaderText("Is this the direction you want?: " + e.getName());
+            
+            Optional<ButtonType> okButton = alert.showAndWait();
+            if (okButton.isPresent() && okButton.get() == ButtonType.CANCEL) {
+                //nada
+            }else{
+                tfOriginInfo.setText(e.getName());
+            }
+        } catch (LogicBusinessException ex) {
+            Logger.getLogger(FXMLDocumentCreateRouteController.class.getName()).log(Level.SEVERE, null, ex);
         }
         
     }
@@ -171,7 +180,12 @@ public class FXMLDocumentCreateRouteController {
      */
     @FXML
     private void handleDestinationButtonAction(ActionEvent event){
-        Direction e = this.cliente.getDirection(tfDestination.getText());
+        Direction e = new Direction();
+        try {
+            e = this.cliente.getDirection(tfDestination.getText());
+        } catch (LogicBusinessException ex) {
+            Logger.getLogger(FXMLDocumentCreateRouteController.class.getName()).log(Level.SEVERE, null, ex);
+        }
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "");
         alert.setTitle("Destination");
         alert.setHeaderText("Is this the direction you want?: " + e.getName());
@@ -235,7 +249,11 @@ public class FXMLDocumentCreateRouteController {
             }
     });
         cbAssignTo.setPromptText("Delivery man/woman");
-        cbAssignTo.getItems().addAll(cliente.getDeliveryUsers());
+        try {
+            cbAssignTo.getItems().addAll(cliente.getDeliveryUsers());
+        } catch (LogicBusinessException ex) {
+            Logger.getLogger(FXMLDocumentCreateRouteController.class.getName()).log(Level.SEVERE, null, ex);
+        }
         cbAssignTo.setOnAction((Event ev) -> {
             delivery = 
                 (User) cbAssignTo.getSelectionModel().getSelectedItem();    

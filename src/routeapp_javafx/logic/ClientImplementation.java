@@ -5,6 +5,8 @@
  */
 package routeapp_javafx.logic;
 
+import beans.Coordinate;
+import beans.Direction;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -26,7 +28,7 @@ import javax.ws.rs.core.GenericType;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import routeapp_javafx.logic.User;
+import beans.User;
 
 /**
  * This is the class that implements the Client methods.
@@ -37,8 +39,15 @@ public class ClientImplementation implements Client {
     private static final Logger LOGGER = Logger
             .getLogger("retoLogin.control.ClientImplementation");
 
+    /**
+     * This method connects with the external web service: Here REST API.
+     * This searches a direction based on the petition of the user and returns it.
+     * @param sitio string representing the direction the user wants
+     * @return the full direction the web service has found with the given one.
+     * @throws LogicBusinessException 
+     */
     @Override
-    public Direction getDirection(String sitio) {
+    public Direction getDirection(String sitio) throws LogicBusinessException{
         Direction direction = new Direction();
         try {
             String inline="";
@@ -99,22 +108,57 @@ public class ClientImplementation implements Client {
                 String hi = "";
             }    
         } catch (MalformedURLException ex) {
-            
+              LOGGER.log(Level.SEVERE,
+                    "External web service: Exception getting the direction, {0}",
+                    ex.getMessage());
+            throw new LogicBusinessException("Error getting delivery users list:\n"+ex
+                    .getMessage());
         } catch (IOException ex) {
-            
+            LOGGER.log(Level.SEVERE,
+                    "Error: Exception reading/writing, {0}",
+                    ex.getMessage());
+            throw new LogicBusinessException("Error writing o reading file:\n"+ex
+                    .getMessage());
         } catch (org.json.simple.parser.ParseException ex) {
-            Logger.getLogger(ClientImplementation.class.getName()).log(Level.SEVERE, null, ex);
+            LOGGER.log(Level.SEVERE,
+                    "JSON Parser: Exception getting the direction, {0}",
+                    ex.getMessage());
+            throw new LogicBusinessException("Error parsing data:\n"+ex
+                    .getMessage());
         }
         return direction;
     }
 
     @Override
-    public List<User> getDeliveryUsers() {
-        UserRESTClient prueba = new UserRESTClient();
+    public List<User> getDeliveryUsers() throws LogicBusinessException {
+        try{
+            UserRESTClient prueba = new UserRESTClient();
         List<User> deliveryUsers;
+        return prueba.findAllDeliveryAccounts(new GenericType<List<User>>(){});
+        }catch(Exception e){
+            LOGGER.log(Level.SEVERE,
+                    "UsersManager: Exception getting delivery users, {0}",
+                    e.getMessage());
+            throw new LogicBusinessException("Error getting delivery users list:\n"+e
+                    .getMessage());
+        }
         
-        deliveryUsers = prueba.findAllDeliveryAccounts(new GenericType<List<User>>(){});
-        return deliveryUsers;
+    }
+
+    @Override
+    public int restorePassword(String email, String login) throws LogicBusinessException {
+        try{
+             UserRESTClient prueba = new UserRESTClient();
+        int result = prueba.forgottenpasswd(int.class, email, login);
+        return result;
+        }catch(Exception e){
+            LOGGER.log(Level.SEVERE,
+                    "UsersManager: Exception restoring password, {0}",
+                    e.getMessage());
+            throw new LogicBusinessException("Error restoring the password:\n"+e
+                    .getMessage());
+        }
+       
     }
     
     

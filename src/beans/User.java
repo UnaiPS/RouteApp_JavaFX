@@ -1,4 +1,4 @@
-package routeapp_javafx.logic;
+package beans;
 
 import java.io.Serializable;
 import java.util.Date;
