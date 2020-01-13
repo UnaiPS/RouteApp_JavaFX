@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1080.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.Admin_Main_MenuController">
+   <children>
+      <Button id="btnLogOut" fx:id="btnLogOut" layoutX="932.0" layoutY="19.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="120.0" text="Log Out" />
+      <TableView id="tblRoute" fx:id="tblRoute" layoutX="9.0" layoutY="114.0" prefHeight="597.0" prefWidth="903.0">
+        <columns>
+          <TableColumn id="colName" fx:id="colName" prefWidth="75.0" text="Name" />
+          <TableColumn id="colCreatedBy" fx:id="colCreatedBy" prefWidth="75.0" text="Created By" />
+            <TableColumn id="colAssignedTo" fx:id="colAssignedTo" prefWidth="75.0" text="Assigned To" />
+            <TableColumn id="colTotalDistance" fx:id="colTotalDistance" prefWidth="75.0" text="Total Distance" />
+            <TableColumn id="colEstimatedTime" fx:id="colEstimatedTime" prefWidth="110.0" text="Estimated Time" />
+            <TableColumn id="colStarted" fx:id="colStarted" prefWidth="70.0" text="Started" />
+            <TableColumn id="colEnded" fx:id="colEnded" prefWidth="75.0" text="Ended" />
+            <TableColumn id="colMode" fx:id="colMode" prefWidth="75.0" text="Mode" />
+            <TableColumn id="colTransMode" fx:id="colTransMode" prefWidth="75.0" text="Transport Mode" />
+            <TableColumn id="colTraffMode" fx:id="colTraffMode" prefWidth="75.0" text="Traffic Mode" />
+        </columns>
+         <columnResizePolicy>
+            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+         </columnResizePolicy>
+      </TableView>
+      <Button id="btnRouteInfoEdit" fx:id="btnRouteInfoEdit" layoutX="932.0" layoutY="297.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="120.0" text="Route Info / Edit" />
+      <Button id="btnDeleteRoute" fx:id="btnDeleteRoute" layoutX="932.0" layoutY="348.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="120.0" text="Delete Route" />
+      <MenuBar id="menuBar" fx:id="menuBar" layoutY="2.0">
+        <menus>
+          <Menu id="menuFile" fx:id="menuFile" mnemonicParsing="false" text="File">
+            <items>
+              <MenuItem id="submenuClose" fx:id="submenuClose" mnemonicParsing="false" text="Close" />
+            </items>
+          </Menu>
+          <Menu id="menuHelp" fx:id="menuHelp" mnemonicParsing="false" text="Help">
+            <items>
+              <MenuItem id="submenuAbout" fx:id="submenuAbout" mnemonicParsing="false" text="About" />
+                  <MenuItem id="submenuHIW" fx:id="submenuHIW" mnemonicParsing="false" text="How It Works" />
+            </items>
+          </Menu>
+        </menus>
+      </MenuBar>
+      <Button id="btnEditProfile" fx:id="btnEditProfile" layoutX="932.0" layoutY="54.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="120.0" text="Edit Profile" />
+      <Text id="txtgreetingText" fx:id="txtgreetingText" layoutX="678.0" layoutY="49.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Welcome, Name Surname1 Surname2">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </Text>
+      <Button id="btnCreateRoute" fx:id="btnCreateRoute" layoutX="932.0" layoutY="250.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="120.0" text="Create Route" />
+   </children>
+</AnchorPane>
