@@ -258,7 +258,7 @@ public class Admin_Main_MenuController {
         btnLogOut.setText("_Log Out");
         
         btnRouteInfoEdit.setMnemonicParsing(true);
-        btnRouteInfoEdit.setText("_¨Route Info/Edit");
+        btnRouteInfoEdit.setText("_Route Info/Edit");
         
         submenuAbout.setAccelerator(new KeyCodeCombination(KeyCode.A, KeyCodeCombination.CONTROL_ANY));
         submenuHIW.setAccelerator(new KeyCodeCombination(KeyCode.F1));
