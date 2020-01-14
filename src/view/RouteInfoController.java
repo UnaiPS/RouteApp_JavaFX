@@ -5,19 +5,25 @@
  */
 package view;
 
+import client.Client;
+import client.ClientFactory;
+import java.io.IOException;
 import java.util.logging.Logger;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import model.Mode;
@@ -105,6 +111,7 @@ public class RouteInfoController {
         stage.setOnCloseRequest(this::handleWindowClosing);
         
         btnReturnToMainMenu.setOnAction(this::handlebtnReturnToMainMenu);
+        btnUpdateAssingRoute.setOnAction(this::handlebtnUpdateAssignRoute);
         
         ObservableList<Mode> modes = FXCollections.observableArrayList();
         modes.add(Mode.FASTEST);
@@ -127,6 +134,31 @@ public class RouteInfoController {
         trafficMode.setItems(traffModes);
         
         stage.show();
+    }
+    
+    public void handlebtnUpdateAssignRoute(ActionEvent e){
+        Alert alert;
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("AssignRoute.fxml"));
+            Parent root = null;
+            try {
+                root = (Parent) loader.load();
+            } catch (IOException ex) {
+                LOGGER.severe("Error: "+ex.getLocalizedMessage());
+            }
+            FXMLDocumentAssignRouteController viewController = loader.getController();
+            Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            Client client = ClientFactory.getClient();
+            viewController.setClient(client);
+            viewController.setStage(stage);
+            viewController.initStage(root);
+        } catch (Exception ex) {
+            alert = new Alert(Alert.AlertType.ERROR, "Something went wrong opening Assign Route window, please try later or restart the programm");
+            alert.setTitle("Something went wrong");
+            alert.showAndWait();
+            LOGGER.severe(ex.getLocalizedMessage());
+        }
     }
     
     public void handlebtnReturnToMainMenu(ActionEvent e){

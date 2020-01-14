@@ -5,6 +5,8 @@
  */
 package view;
 
+import client.Client;
+import client.ClientFactory;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Optional;
@@ -233,6 +235,28 @@ public class Admin_Main_MenuController {
     
     public void handleBtnCreateRoute(ActionEvent e){
         LOGGER.info("Create Route button pressed, opening new window...");
+        Alert alert;
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("CreateRoute.fxml"));
+            Parent root = null;
+            try {
+                root = (Parent) loader.load();
+            } catch (IOException ex) {
+                LOGGER.severe("Error: "+ex.getLocalizedMessage());
+            }
+            FXMLDocumentCreateRouteController viewController = loader.getController();
+            Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            Client client = ClientFactory.getClient();
+            viewController.setClient(client);
+            viewController.setStage(stage);
+            viewController.initStage(root);
+        } catch (Exception ex) {
+            alert = new Alert(Alert.AlertType.ERROR, "Something went wrong opening Create Route window, please try later or restart the programm");
+            alert.setTitle("Something went wrong");
+            alert.showAndWait();
+            LOGGER.severe(ex.getLocalizedMessage());
+        }
     }
     
     public void handleBtnProfile(ActionEvent e){
