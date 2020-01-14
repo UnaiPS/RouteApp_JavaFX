@@ -21,6 +21,5 @@ public interface Client {
     public List<User> getDeliveryUsers() throws LogicBusinessException;
     public int restorePassword(String email, String login) throws LogicBusinessException;
     public Route getRoute(ArrayList<String> coords, Route route) throws LogicBusinessException;
-    public String getCoords(String direction) throws LogicBusinessException;
     
 }
