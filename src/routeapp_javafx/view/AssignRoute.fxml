@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Text?>
+
+<AnchorPane id="pnAssignRoute" fx:id="pnAssignRoute" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="routeapp_javafx.view.FXMLDocumentAssignRouteController">
+   <children>
+      <Text layoutX="163.0" layoutY="100.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Route Name:" />
+      <TextField id="tfName" fx:id="tfName" disable="true" layoutX="290.0" layoutY="83.0" />
+      <ComboBox id="cbAssignTo" fx:id="cbAssignTo" layoutX="289.0" layoutY="214.0" prefWidth="150.0" />
+      <Text layoutX="163.0" layoutY="231.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Assign To:" />
+      <Button id="btnSaveChanges" fx:id="btnSaveChanges" onAction="#handleSaveButtonAction" layoutX="256.0" layoutY="328.0" mnemonicParsing="false" text="Save Changes" />
+      <TextField id="tfEstimatedTime" fx:id="tfEstimatedTime" disable="true" layoutX="289.0" layoutY="126.0" />
+      <TextField id="tfTotalDistance" fx:id="tfTotalDistance" disable="true" layoutX="289.0" layoutY="170.0" />
+      <Text layoutX="163.0" layoutY="143.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Estimated Time:" />
+      <Text layoutX="163.0" layoutY="187.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Total Distance:" />
+   </children>
+</AnchorPane>
