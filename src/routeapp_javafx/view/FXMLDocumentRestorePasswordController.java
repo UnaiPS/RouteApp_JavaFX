@@ -7,24 +7,17 @@ package routeapp_javafx.view;
 
 import java.util.Optional;
 import javafx.event.ActionEvent;
-import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
-import javafx.scene.control.ToggleGroup;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import javafx.util.StringConverter;
 import routeapp_javafx.logic.Client;
-import beans.Mode;
 import beans.Route;
-import beans.TrafficMode;
-import beans.TransportMode;
 import beans.User;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -123,6 +116,10 @@ public class FXMLDocumentRestorePasswordController {
        } 
     }
        
+    /**  TODOOOOO
+     * Cancels the operation and goes back to the login window.
+     * @param event 
+     */
     @FXML
     private void handleCancelButtonAction(ActionEvent event){
         Route route = new Route();
@@ -134,7 +131,7 @@ public class FXMLDocumentRestorePasswordController {
     }
     
     /**
-     * This method handle the actions when the user click the close button of the window
+     * This method handles the actions when the user click the close button of the window
      * @param event Object of type WindowEvent
      */
     public void handleWindowClosing(WindowEvent event) {
@@ -146,7 +143,4 @@ public class FXMLDocumentRestorePasswordController {
             event.consume();
         }
     }
-    
-    
-    
 }

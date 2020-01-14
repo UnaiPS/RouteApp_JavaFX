@@ -7,6 +7,7 @@ package routeapp_javafx.logic;
 
 import beans.User;
 import beans.Direction;
+import beans.Route;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -19,5 +20,7 @@ public interface Client {
     public Direction getDirection(String direction) throws LogicBusinessException;
     public List<User> getDeliveryUsers() throws LogicBusinessException;
     public int restorePassword(String email, String login) throws LogicBusinessException;
+    public Route getRoute(ArrayList<String> coords, Route route) throws LogicBusinessException;
+    public String getCoords(String direction) throws LogicBusinessException;
     
 }

@@ -5,19 +5,16 @@
  */
 package routeapp_javafx.view;
 
+import beans.Coordinate;
+import beans.Coordinate_Route;
 import beans.DirectionTvBean;
 import beans.DirectionTvManager;
-import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
-import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -32,7 +29,6 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.util.StringConverter;
@@ -43,6 +39,9 @@ import beans.Route;
 import beans.TrafficMode;
 import beans.TransportMode;
 import beans.User;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import routeapp_javafx.logic.LogicBusinessException;
@@ -55,6 +54,7 @@ public class FXMLDocumentCreateRouteController {
     private Stage stage;
     private Client cliente;
     private User delivery = null;
+    private User admin;
     
     private ObservableList directions;
     
@@ -110,6 +110,10 @@ public class FXMLDocumentCreateRouteController {
     
     public void setStage(Stage stage) {
         this.stage = stage;
+    }
+    
+    public void setUser(User user) {
+        this.admin = user;
     }
 
     /**
@@ -168,6 +172,15 @@ public class FXMLDocumentCreateRouteController {
             }
         } catch (LogicBusinessException ex) {
             Logger.getLogger(FXMLDocumentCreateRouteController.class.getName()).log(Level.SEVERE, null, ex);
+        Alert alert=new Alert(Alert.AlertType.ERROR,
+                            "We can't load data right now. Please try again later.",
+                            ButtonType.OK);
+            alert.showAndWait();
+        }catch(IndexOutOfBoundsException ex){
+            Alert alert=new Alert(Alert.AlertType.ERROR,
+                            "We couldn't find any direction with the entered data.",
+                            ButtonType.OK);
+            alert.showAndWait();
         }
         
     }
@@ -185,7 +198,19 @@ public class FXMLDocumentCreateRouteController {
             e = this.cliente.getDirection(tfDestination.getText());
         } catch (LogicBusinessException ex) {
             Logger.getLogger(FXMLDocumentCreateRouteController.class.getName()).log(Level.SEVERE, null, ex);
+        Alert alert=new Alert(Alert.AlertType.ERROR,
+                            "We can't load data right now. Please try again later.",
+                            ButtonType.OK);
+            alert.showAndWait();
+            return;
+        }catch(IndexOutOfBoundsException ex){
+            Alert alert=new Alert(Alert.AlertType.ERROR,
+                            "We couldn't find any direction with the entered data.",
+                            ButtonType.OK);
+            alert.showAndWait();
+            return;
         }
+        
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "");
         alert.setTitle("Destination");
         alert.setHeaderText("Is this the direction you want?: " + e.getName());
@@ -236,7 +261,7 @@ public class FXMLDocumentCreateRouteController {
         });
         tcName.setCellValueFactory(new PropertyValueFactory<>("name"));
        
-        //sets the ComboBox values as Strings so the user can only see their names.
+        //Sets the ComboBox values as Strings so the user can only see their names.
         cbAssignTo.setConverter(new StringConverter<User>() {
             @Override
             public String toString(User object) {
@@ -268,6 +293,13 @@ public class FXMLDocumentCreateRouteController {
      */
     @FXML
     private void handleSaveButtonAction(ActionEvent event){
+        if(tfName.getText().length()>30){
+            Alert alert=new Alert(Alert.AlertType.ERROR,
+                            "The name you've entered is too long",
+                            ButtonType.OK);
+            alert.showAndWait();
+            return;
+        }
         if("".equals(tfName.getText())){
             Alert alert=new Alert(Alert.AlertType.ERROR,
                             "You must enter the route's name.",
@@ -310,7 +342,9 @@ public class FXMLDocumentCreateRouteController {
             alert.showAndWait();
             return;
         }
+        //Here I set the route's data.
         Route route = new Route();
+        route.setCreatedBy(admin);
         route.setAssignedTo(delivery);
         route.setName(tfName.getText());
         if(rdbtnBalanced.isSelected()){
@@ -334,10 +368,44 @@ public class FXMLDocumentCreateRouteController {
             route.setTrafficMode(TrafficMode.ENABLED);
         }
         
+        ArrayList<Direction> directions = new ArrayList<Direction>();
+        Direction startDir = new Direction();
+        try {
+            startDir = cliente.getDirection(tfOrigin.getText());
+            directions.add(startDir);
+        
+         for(int i = 0; i<tvDestinations.getItems().size(); i++){
+             Direction dest = new Direction();
+             String desti = (String)tvDestinations.getItems().get(i);
+             dest = cliente.getDirection(desti);
+             directions.add(dest);
+         }
+        }catch (LogicBusinessException ex) {
+            Logger.getLogger(FXMLDocumentCreateRouteController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        ArrayList<String> coords = new ArrayList<String>();
+        coords.add(startDir.getCoordinate().getLatitude() + "," + startDir.getCoordinate().getLongitude());
+        for(Direction dir : directions){
+            String coord = dir.getCoordinate().getLatitude() + "," + dir.getCoordinate().getLongitude();
+            coords.add(coord);
+        }
+        
+        try {
+            route = cliente.getRoute(coords, route);
+        } catch (LogicBusinessException ex) {
+            Logger.getLogger(FXMLDocumentCreateRouteController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        
+        Alert alert=new Alert(Alert.AlertType.INFORMATION,
+                            "The route has been saved.",
+                            ButtonType.OK);
+            alert.showAndWait();
     }
     
     /**
-     * This method handle the actions when the user click the close button of the window
+     * This method handles the actions when the user click the close button of the window
      * @param event Object of type WindowEvent
      */
     public void handleWindowClosing(WindowEvent event) {
@@ -348,8 +416,5 @@ public class FXMLDocumentCreateRouteController {
         if (okButton.isPresent() && okButton.get() == ButtonType.CANCEL) {    
             event.consume();
         }
-    }
-    
-    
-    
+    }  
 }

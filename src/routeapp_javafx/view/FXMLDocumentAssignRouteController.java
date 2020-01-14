@@ -132,7 +132,7 @@ public class FXMLDocumentAssignRouteController {
     }
     
     /**
-     * This method handle the actions when the user click the close button of the window
+     * This method handles the actions when the user click the close button of the window
      * @param event Object of type WindowEvent
      */
     public void handleWindowClosing(WindowEvent event) {
