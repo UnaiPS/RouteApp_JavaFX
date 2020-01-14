@@ -5,8 +5,6 @@
  */
 package routeapp_javafx.view;
 
-import beans.Coordinate;
-import beans.Coordinate_Route;
 import beans.DirectionTvBean;
 import beans.DirectionTvManager;
 import java.util.Optional;
@@ -40,8 +38,6 @@ import beans.TrafficMode;
 import beans.TransportMode;
 import beans.User;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import routeapp_javafx.logic.LogicBusinessException;
@@ -55,6 +51,8 @@ public class FXMLDocumentCreateRouteController {
     private Client cliente;
     private User delivery = null;
     private User admin;
+    private ArrayList<Direction> directionsJIC;
+    private Direction originJIC;
     
     private ObservableList directions;
     
@@ -145,8 +143,11 @@ public class FXMLDocumentCreateRouteController {
      */
     @FXML
     private void handleDeleteButtonAction(ActionEvent event){
+        int ind = tvDestinations.getSelectionModel().getSelectedIndex();
+        directionsJIC.remove(ind);
         tvDestinations.getItems().remove(tvDestinations.getSelectionModel()
                 .getSelectedItem());
+        
         tvDestinations.refresh();
     }
     
@@ -169,6 +170,7 @@ public class FXMLDocumentCreateRouteController {
                 //nada
             }else{
                 tfOriginInfo.setText(e.getName());
+                originJIC = e;
             }
         } catch (LogicBusinessException ex) {
             Logger.getLogger(FXMLDocumentCreateRouteController.class.getName()).log(Level.SEVERE, null, ex);
@@ -220,6 +222,7 @@ public class FXMLDocumentCreateRouteController {
             //nada
         }else{
            tvDestinations.getItems().add(new DirectionTvBean(e.getName()));
+           directionsJIC.add(e);
         }
         tvDestinations.refresh();
     }
@@ -239,7 +242,8 @@ public class FXMLDocumentCreateRouteController {
         rdbtnCarHov.setToggleGroup(groupTransport);
         rdbtnPedestrian.setToggleGroup(groupTransport);
         rdbtnTruck.setToggleGroup(groupTransport);
-
+        directionsJIC = new ArrayList<Direction>();
+        
         cbDontAssignYet.selectedProperty().addListener(new ChangeListener<Boolean>() {
             /**
              * Manages whether the "don't assign yet" option is checked. If it's
@@ -347,56 +351,33 @@ public class FXMLDocumentCreateRouteController {
         route.setCreatedBy(admin);
         route.setAssignedTo(delivery);
         route.setName(tfName.getText());
-        if(rdbtnBalanced.isSelected()){
-            route.setMode(Mode.BALANCED);
-        }else if(rdbtnFastest.isSelected()){
-            route.setMode(Mode.FASTEST);
-        }else{
-            route.setMode(Mode.SHORTEST);
-        }
+        if(rdbtnBalanced.isSelected()) route.setMode(Mode.BALANCED);
+        else if(rdbtnFastest.isSelected()) route.setMode(Mode.FASTEST);
+        else route.setMode(Mode.SHORTEST);
         
-        if(rdbtnCar.isSelected()){
-            route.setTransportMode(TransportMode.CAR);
-        }else if(rdbtnCarHov.isSelected()){
-            route.setTransportMode(TransportMode.CAR_HOV);
-        }else if(rdbtnPedestrian.isSelected()){
-            route.setTransportMode(TransportMode.PEDESTRIAN);    
-        }else{
-            route.setTransportMode(TransportMode.TRUCK);
-        }
-        if(cbEnableTrafficMode.isSelected()){
-            route.setTrafficMode(TrafficMode.ENABLED);
-        }
         
-        ArrayList<Direction> directions = new ArrayList<Direction>();
-        Direction startDir = new Direction();
-        try {
-            startDir = cliente.getDirection(tfOrigin.getText());
-            directions.add(startDir);
+        if(rdbtnCar.isSelected()) route.setTransportMode(TransportMode.CAR);
+        else if(rdbtnCarHov.isSelected()) route.setTransportMode(TransportMode.CAR_HOV);
+        else if(rdbtnPedestrian.isSelected()) route.setTransportMode(TransportMode.PEDESTRIAN);    
+        else route.setTransportMode(TransportMode.TRUCK);
         
-         for(int i = 0; i<tvDestinations.getItems().size(); i++){
-             Direction dest = new Direction();
-             String desti = (String)tvDestinations.getItems().get(i);
-             dest = cliente.getDirection(desti);
-             directions.add(dest);
-         }
-        }catch (LogicBusinessException ex) {
-            Logger.getLogger(FXMLDocumentCreateRouteController.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        
+        if(cbEnableTrafficMode.isSelected()) route.setTrafficMode(TrafficMode.ENABLED);
+        else route.setTrafficMode(TrafficMode.DISABLED);
         
         ArrayList<String> coords = new ArrayList<String>();
-        coords.add(startDir.getCoordinate().getLatitude() + "," + startDir.getCoordinate().getLongitude());
-        for(Direction dir : directions){
+        coords.add(originJIC.getCoordinate().getLatitude() + "," + originJIC.getCoordinate().getLongitude());
+        for(Direction dir : directionsJIC){
             String coord = dir.getCoordinate().getLatitude() + "," + dir.getCoordinate().getLongitude();
             coords.add(coord);
         }
         
         try {
             route = cliente.getRoute(coords, route);
+            //HERE WE HAVE TO CALL THE SERVER TO SAVE THE ROUTE AND THE DIRECTIONS AND EVERYTHING.
         } catch (LogicBusinessException ex) {
             Logger.getLogger(FXMLDocumentCreateRouteController.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
         
         Alert alert=new Alert(Alert.AlertType.INFORMATION,
                             "The route has been saved.",
