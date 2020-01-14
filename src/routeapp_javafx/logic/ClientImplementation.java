@@ -180,7 +180,7 @@ public class ClientImplementation implements Client {
         
         if(route.getTrafficMode() == TrafficMode.DISABLED)
         mode += ";traffic:disabled"; 
-        else mode += ";traffic:enabled";
+        else mode += ";traffic:disabled";
         
         for(int i = 0; i<coords.size(); i++){
             consulta += "&waypoint" + i + "=" + coords.get(i);
@@ -219,6 +219,8 @@ public class ClientImplementation implements Client {
                 
                 int time = Integer.parseInt(baseTime) + Integer.parseInt(trafficTime);
                 Double distance2 = Double.parseDouble(distance);
+                route.setEstimatedTime(time);
+                route.setTotalDistance(distance2);
             } 
         } catch (MalformedURLException ex) {
             Logger.getLogger(ClientImplementation.class.getName()).log(Level.SEVERE, null, ex);
@@ -227,7 +229,7 @@ public class ClientImplementation implements Client {
         } catch (IOException ex) {
             Logger.getLogger(ClientImplementation.class.getName()).log(Level.SEVERE, null, ex);
         }
-    return null;
+    return route;
     
 }
 
