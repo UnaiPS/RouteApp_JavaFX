@@ -7,7 +7,7 @@ package view;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Set;
+import java.util.Optional;
 import java.util.logging.Logger;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -16,12 +16,15 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
@@ -130,16 +133,20 @@ public class Admin_Main_MenuController {
         submenuHIW.setOnAction(this::handleHowItWorksMenuItem);
         
         colAssignedTo.setCellValueFactory(new PropertyValueFactory<>("assignedTo"));
+        
         colCreatedBy.setCellValueFactory(new PropertyValueFactory<>("createdBy"));
         colEnded.setCellValueFactory(new PropertyValueFactory<>("ended"));
         colEstimatedTime.setCellValueFactory(new PropertyValueFactory<>("estimatedTime"));
         colMode.setCellValueFactory(new PropertyValueFactory<>("mode"));
         colName.setCellValueFactory(new PropertyValueFactory<>("name"));
         colStarted.setCellValueFactory(new PropertyValueFactory<>("started"));
+        //colStarted.setCellFactory(tc -> new CheckBoxTableCell<>());
         colTotalDistance.setCellValueFactory(new PropertyValueFactory<>("totalDistance"));
         colTraffMode.setCellValueFactory(new PropertyValueFactory<>("trafficMode"));
         colTransMode.setCellValueFactory(new PropertyValueFactory<>("transportMode"));
-        //routes.stream().forEach(route->);
+        
+        
+        
         ObservableList<Route> routesList = FXCollections.observableArrayList(routes);
         
         tblRoute.setItems(routesList);
@@ -162,29 +169,66 @@ public class Admin_Main_MenuController {
     
     public void handleAboutMenuItem(ActionEvent event){
         LOGGER.info("About Menu Item pressed");
+        Alert alert = new Alert(Alert.AlertType.INFORMATION, "Made by Jon Calvo Gaminde, Unai Pérez Sánchez and Daira Eguzkiza Lamelas.");
+        alert.setTitle("About");
+        alert.setHeaderText("Version 1.0");
+        Optional<ButtonType> okButton = alert.showAndWait();
+        if (okButton.isPresent() && okButton.get() == ButtonType.OK) {
+            alert.close();
+        }
     }
     
     public void handleBtnDeleteRoute(ActionEvent e){
+        Alert alert;
         LOGGER.info("Delete Route button pressed with the Route: ");
+        try{
+            if(!tblRoute.getSelectionModel().getSelectedItem().equals(null)){
+                alert = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure that you want to delete the route?",ButtonType.YES,ButtonType.NO);
+                Optional<ButtonType> result = alert.showAndWait();
+                if(result.get()==ButtonType.YES){
+                    tblRoute.getItems().remove(tblRoute.getSelectionModel().getSelectedItem());
+                    tblRoute.refresh();
+                }
+            }else{
+                throw new Exception();
+            }
+            
+        }catch(Exception ex){
+            alert = new Alert(Alert.AlertType.ERROR, "No route was selected. Please, select one route to edit or see the information about it.");
+            alert.setTitle("No route selected");
+            alert.showAndWait();
+            LOGGER.severe(ex.getLocalizedMessage());
+        }
+        
     }
     
     public void handleBtnRouteInfoEdit(ActionEvent e){
         LOGGER.info("Route Info/Edit button pressed, opening new window...");
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("Route Info.fxml"));
-        Parent root = null;
+        Alert alert;
         try {
-            root = (Parent) loader.load();
-        } catch (IOException ex) {
-            LOGGER.severe("Error: "+ex.getLocalizedMessage());
+            Route selectedRoute = ((Route)tblRoute.getSelectionModel().getSelectedItem());
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("Route Info.fxml"));
+            Parent root = null;
+            try {
+                root = (Parent) loader.load();
+            } catch (IOException ex) {
+                LOGGER.severe("Error: "+ex.getLocalizedMessage());
+            }
+            RouteInfoController viewController = loader.getController();
+            viewController.setRoute(route);
+            Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            viewController.setRoute(selectedRoute);
+            viewController.setStage(stage);
+            viewController.initStage(root);
+        } catch (Exception ex) {
+            alert = new Alert(Alert.AlertType.ERROR, "No route was selected. Please, select one route to edit or see the information about it.");
+            alert.setTitle("No route selected");
+            alert.showAndWait();
+            LOGGER.severe(ex.getLocalizedMessage());
         }
-        RouteInfoController viewController = loader.getController();
-        viewController.setRoute(route);
-        stage.close();
-        Stage stage = new Stage();
-        stage.initModality(Modality.APPLICATION_MODAL);
-        viewController.setRoute(route);
-        viewController.setStage(stage);
-        viewController.initStage(root);
+        
+        
     }
     
     public void handleBtnCreateRoute(ActionEvent e){
@@ -197,6 +241,7 @@ public class Admin_Main_MenuController {
     
     public void handleBtnLogOut(ActionEvent e){
         LOGGER.info("Log Out button pressed, returning to the Login window...");
+        
     }
     
     public void handleWindowShowing(WindowEvent e){
@@ -215,9 +260,9 @@ public class Admin_Main_MenuController {
         btnRouteInfoEdit.setMnemonicParsing(true);
         btnRouteInfoEdit.setText("_¨Route Info/Edit");
         
-        submenuAbout.setAccelerator(new KeyCodeCombination(KeyCode.A, KeyCodeCombination.ALT_ANY));
+        submenuAbout.setAccelerator(new KeyCodeCombination(KeyCode.A, KeyCodeCombination.CONTROL_ANY));
         submenuHIW.setAccelerator(new KeyCodeCombination(KeyCode.F1));
-        submenuClose.setAccelerator(new KeyCodeCombination(KeyCode.C,KeyCodeCombination.ALT_ANY));
+        submenuClose.setAccelerator(new KeyCodeCombination(KeyCode.C,KeyCodeCombination.CONTROL_ANY));
     }
     
     public void handleWindowClosing(WindowEvent e){
