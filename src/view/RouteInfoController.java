@@ -5,6 +5,7 @@
  */
 package view;
 
+import beans.Coordinate_Route;
 import client.Client;
 import client.ClientFactory;
 import java.io.IOException;
@@ -26,10 +27,13 @@ import javafx.scene.control.TextField;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import model.Mode;
-import model.Route;
-import model.TrafficMode;
-import model.TransportMode;
+import beans.Mode;
+import beans.Route;
+import beans.TrafficMode;
+import beans.TransportMode;
+import beans.User;
+import client.ClientRoute;
+import client.UserRESTClient;
 
 /**
  * FXML Controller class
@@ -45,6 +49,14 @@ public class RouteInfoController {
     private Route route;
     
     private ObservableList<Route> routes;
+    
+    private UserRESTClient userClient = new UserRESTClient();
+    
+    private ClientRoute routeClient = new ClientRoute();
+    
+    private Alert alert;
+    
+    private User user;
     
     @FXML
     private TextField routeName;
@@ -98,9 +110,8 @@ public class RouteInfoController {
      */
     public void initStage(Parent root) {
         LOGGER.info("Initializing Route Info stage");
-        
+        LOGGER.info("Coordinates size: "+route.getCoordinates().size());
         Scene scene = new Scene(root);
-        
         stage.setScene(scene);
         /*
         The window will not be resizable
@@ -112,6 +123,7 @@ public class RouteInfoController {
         
         btnReturnToMainMenu.setOnAction(this::handlebtnReturnToMainMenu);
         btnUpdateAssingRoute.setOnAction(this::handlebtnUpdateAssignRoute);
+        btnSaveChanges.setOnAction(this::handlebtnSaveChanges);
         
         ObservableList<Mode> modes = FXCollections.observableArrayList();
         modes.add(Mode.FASTEST);
@@ -136,8 +148,37 @@ public class RouteInfoController {
         stage.show();
     }
     
+    public void handlebtnSaveChanges(ActionEvent e){
+        route.setCoordinates(null);
+        route.setAssignedTo(route.getAssignedTo());
+        route.setMode(mode.getValue());
+        route.setName(routeName.getText());
+        route.setTrafficMode(trafficMode.getValue());
+        route.setTransportMode(transportMode.getValue());
+        try{
+            routeClient.edit(route);
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("Admin_Main_Menu.fxml"));
+            Parent root = null;
+            try {
+                root = (Parent) loader.load();
+            } catch (IOException ex) {
+                LOGGER.severe("Error: "+ex.getLocalizedMessage());
+            }
+            Admin_Main_MenuController viewController = loader.getController();
+            Stage stage = new Stage();
+            stage.initModality(Modality.NONE);
+            viewController.setUser(user);
+            viewController.setStage(stage);
+            viewController.initStage(root);
+            this.stage.close();
+        }catch(Exception ex){
+            LOGGER.severe("Error: "+ex.getLocalizedMessage());
+            alert = new Alert(Alert.AlertType.ERROR, "Unexpected error happened");
+            alert.showAndWait();
+        }
+    }
+    
     public void handlebtnUpdateAssignRoute(ActionEvent e){
-        Alert alert;
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("AssignRoute.fxml"));
             Parent root = null;
@@ -162,7 +203,26 @@ public class RouteInfoController {
     }
     
     public void handlebtnReturnToMainMenu(ActionEvent e){
-        stage.close();
+         try{
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("Admin_Main_Menu.fxml"));
+            Parent root = null;
+            try {
+                root = (Parent) loader.load();
+            } catch (IOException ex) {
+                LOGGER.severe("Error: "+ex.getLocalizedMessage());
+            }
+            Admin_Main_MenuController viewController = loader.getController();
+            Stage stage = new Stage();
+            stage.initModality(Modality.NONE);
+            viewController.setUser(user);
+            viewController.setStage(stage);
+            viewController.initStage(root);
+            this.stage.close();
+        }catch(Exception ex){
+            LOGGER.severe("Error: "+ex.getLocalizedMessage());
+            alert = new Alert(Alert.AlertType.ERROR, "Unexpected error happened");
+            alert.showAndWait();
+        }
     }
     
     public void handleWindowShowing(WindowEvent e){
@@ -200,6 +260,14 @@ public class RouteInfoController {
      */
     public Stage getStage(){
         return stage;
+    }
+    
+    public User getUser(){
+        return user;
+    }
+    
+    public void setUser(User user){
+        this.user=user;
     }
     
 }

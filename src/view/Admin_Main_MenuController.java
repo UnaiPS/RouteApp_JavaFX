@@ -7,6 +7,7 @@ package view;
 
 import client.Client;
 import client.ClientFactory;
+import client.ClientRoute;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Optional;
@@ -34,8 +35,9 @@ import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import model.Route;
-import model.User;
+import javax.ws.rs.core.GenericType;
+import beans.Route;
+import beans.User;
 
 /**
  * FXML Controller class
@@ -54,6 +56,8 @@ public class Admin_Main_MenuController {
     
     private ArrayList<Route> routes = new ArrayList<Route>();
     
+    private ClientRoute client = new ClientRoute();
+    
     
     @FXML
     private Button btnLogOut;
@@ -70,9 +74,9 @@ public class Admin_Main_MenuController {
     @FXML
     private TableColumn<?, ?> colEstimatedTime;
     @FXML
-    private TableColumn<?, ?> colStarted;
+    private TableColumn<Route, Boolean> colStarted;
     @FXML
-    private TableColumn<?, ?> colEnded;
+    private TableColumn<Route, Boolean> colEnded;
     @FXML
     private TableColumn<?, ?> colMode;
     @FXML
@@ -147,10 +151,9 @@ public class Admin_Main_MenuController {
         colTraffMode.setCellValueFactory(new PropertyValueFactory<>("trafficMode"));
         colTransMode.setCellValueFactory(new PropertyValueFactory<>("transportMode"));
         
-        
-        
+        client.findAll(new GenericType<ArrayList<Route>>(){});
+        routes.addAll(client.findAll(new GenericType<ArrayList<Route>>(){}));
         ObservableList<Route> routesList = FXCollections.observableArrayList(routes);
-        
         tblRoute.setItems(routesList);
         
         /*
@@ -167,6 +170,7 @@ public class Admin_Main_MenuController {
     
     public void handleCloseMenuItem(ActionEvent event){
         LOGGER.info("Close Menu Item pressed");
+        stage.close();
     }
     
     public void handleAboutMenuItem(ActionEvent event){
@@ -188,8 +192,18 @@ public class Admin_Main_MenuController {
                 alert = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure that you want to delete the route?",ButtonType.YES,ButtonType.NO);
                 Optional<ButtonType> result = alert.showAndWait();
                 if(result.get()==ButtonType.YES){
-                    tblRoute.getItems().remove(tblRoute.getSelectionModel().getSelectedItem());
-                    tblRoute.refresh();
+                    try{
+                        client.remove(tblRoute.getSelectionModel().getSelectedItem().getId().toString());
+                        tblRoute.getItems().remove(tblRoute.getSelectionModel().getSelectedItem());
+                        tblRoute.refresh();
+                    }catch(Exception ex){
+                        alert = new Alert(Alert.AlertType.ERROR, "No route was selected. Please, select one route to edit or see the information about it.");
+                        alert.setTitle("No route selected");
+                        alert.showAndWait();
+                        LOGGER.severe(ex.getLocalizedMessage());
+                    }
+                    
+                    
                 }
             }else{
                 throw new Exception();
@@ -219,10 +233,12 @@ public class Admin_Main_MenuController {
             RouteInfoController viewController = loader.getController();
             viewController.setRoute(route);
             Stage stage = new Stage();
-            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.initModality(Modality.NONE);
             viewController.setRoute(selectedRoute);
+            viewController.setUser(user);
             viewController.setStage(stage);
             viewController.initStage(root);
+            this.stage.close();
         } catch (Exception ex) {
             alert = new Alert(Alert.AlertType.ERROR, "No route was selected. Please, select one route to edit or see the information about it.");
             alert.setTitle("No route selected");
@@ -245,12 +261,15 @@ public class Admin_Main_MenuController {
                 LOGGER.severe("Error: "+ex.getLocalizedMessage());
             }
             FXMLDocumentCreateRouteController viewController = loader.getController();
+            
             Stage stage = new Stage();
-            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.initModality(Modality.NONE);
             Client client = ClientFactory.getClient();
             viewController.setClient(client);
+            viewController.setUser(user);
             viewController.setStage(stage);
             viewController.initStage(root);
+            this.stage.close();
         } catch (Exception ex) {
             alert = new Alert(Alert.AlertType.ERROR, "Something went wrong opening Create Route window, please try later or restart the programm");
             alert.setTitle("Something went wrong");
@@ -323,5 +342,7 @@ public class Admin_Main_MenuController {
     public ArrayList<Route> getRoutes(){
         return routes;
     }
+    
+    
     
 }
