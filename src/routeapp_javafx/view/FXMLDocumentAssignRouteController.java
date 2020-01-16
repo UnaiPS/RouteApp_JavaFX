@@ -38,6 +38,7 @@ public class FXMLDocumentAssignRouteController {
     private Stage stage;
     private Client cliente;
     private User delivery = null;
+    private Route route;
     
     
     @FXML
@@ -55,6 +56,14 @@ public class FXMLDocumentAssignRouteController {
     public void setStage(Stage stage) {
         this.stage = stage;
     }
+    
+    public void setRoute(Route route) {
+        this.route = route;
+    }
+    
+    public void setUser(User user) {
+        delivery = user;
+     }
 
     /**
      * Initializes the stage.

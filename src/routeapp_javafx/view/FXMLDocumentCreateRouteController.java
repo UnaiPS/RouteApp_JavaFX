@@ -6,11 +6,9 @@
 package routeapp_javafx.view;
 
 import beans.DirectionTvBean;
-import beans.DirectionTvManager;
 import java.util.Optional;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.fxml.FXML;
@@ -37,9 +35,23 @@ import beans.Route;
 import beans.TrafficMode;
 import beans.TransportMode;
 import beans.User;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.event.EventHandler;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.DatePicker;
+import javafx.scene.control.MenuItem;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import routeapp_javafx.logic.LogicBusinessException;
 
 /**
@@ -49,15 +61,11 @@ import routeapp_javafx.logic.LogicBusinessException;
 public class FXMLDocumentCreateRouteController {
     private Stage stage;
     private Client cliente;
-    private User delivery = null;
+    private User delivery;
     private User admin;
     private ArrayList<Direction> directionsJIC;
     private Direction originJIC;
-    
-    private ObservableList directions;
-    
-    private DirectionTvManager directionsManager;
-    
+    private LocalDate deadline;
     @FXML
     private Button btnReturnToMenu;
     @FXML
@@ -102,6 +110,9 @@ public class FXMLDocumentCreateRouteController {
     @FXML
     private TableColumn tcName;
     
+    @FXML
+    private DatePicker dpDeadLine = new DatePicker();
+    
     final ToggleGroup groupMode = new ToggleGroup();
     
     final ToggleGroup groupTransport = new ToggleGroup();
@@ -126,6 +137,101 @@ public class FXMLDocumentCreateRouteController {
         stage.setScene(scene);
         stage.show();
         
+        ActionEvent event = null;
+        //shortcut for saving the route pressing ctr+S
+        btnSaveRoute.getScene().getAccelerators().put(
+        new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN), 
+        new Runnable() {
+          @Override public void run() {
+              handleSaveButtonAction(event);
+          }
+        }
+      );
+        
+        //Creation of the context menu
+        ContextMenu cm = new ContextMenu();
+        MenuItem delete = new MenuItem("Delete");
+        cm.getItems().add(delete);
+        
+        //Shows the context menu when clicking the table with the right mouse button
+        tvDestinations.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+
+            @Override
+            public void handle(MouseEvent t) {
+                if(t.getButton() == MouseButton.SECONDARY) cm.show(tvDestinations, t.getScreenX(), t.getScreenY());
+            }
+        });
+        //deletes a table entry when clicking on the "Delete" menu item on a table row.
+        delete.setOnAction(new EventHandler<ActionEvent>() {  
+                @Override  
+                public void handle(ActionEvent event) {  
+                    handleDeleteButtonAction(event);
+                }  
+            });  
+        btnCheckOrigin.setOnKeyPressed(new EventHandler<KeyEvent>()
+        {
+            @Override
+            public void handle(KeyEvent ke)
+            {
+                if (ke.getCode().equals(KeyCode.ENTER)) handleOriginButtonAction(event);
+            }
+        });
+        tfOrigin.setOnKeyPressed(new EventHandler<KeyEvent>()
+        {
+            @Override
+            public void handle(KeyEvent ke)
+            {
+                if (ke.getCode().equals(KeyCode.ENTER)) handleOriginButtonAction(event);
+            }
+        });
+        btnCheckDestination.setOnKeyPressed(new EventHandler<KeyEvent>()
+        {
+            @Override
+            public void handle(KeyEvent ke)
+            {
+                if (ke.getCode().equals(KeyCode.ENTER)) handleDestinationButtonAction(event);
+            }
+        });
+        tfDestination.setOnKeyPressed(new EventHandler<KeyEvent>()
+        {
+            @Override
+            public void handle(KeyEvent ke)
+            { 
+                if (ke.getCode().equals(KeyCode.ENTER)) handleDestinationButtonAction(event);
+            }
+        });
+        cbDontAssignYet.setOnKeyPressed(new EventHandler<KeyEvent>()
+        {
+            @Override
+            public void handle(KeyEvent ke)
+            {
+                if (ke.getCode().equals(KeyCode.ENTER))
+                {
+                   if(cbDontAssignYet.isSelected()){
+                    cbDontAssignYet.setSelected(false);
+                    cbAssignTo.setDisable(false);
+
+                }else{
+                    cbAssignTo.setDisable(true);
+                    delivery = null;
+                    cbDontAssignYet.setSelected(true);
+                }
+                }
+            }
+        });
+        cbEnableTrafficMode.setOnKeyPressed(new EventHandler<KeyEvent>()
+        {
+            @Override
+            public void handle(KeyEvent ke)
+            {
+                if (ke.getCode().equals(KeyCode.ENTER))
+                {
+                   if(cbEnableTrafficMode.isSelected()){
+                    cbEnableTrafficMode.setSelected(false);
+                }else cbEnableTrafficMode.setSelected(true);
+                }
+            }
+        });
     }
     
     /**
@@ -147,7 +253,6 @@ public class FXMLDocumentCreateRouteController {
         directionsJIC.remove(ind);
         tvDestinations.getItems().remove(tvDestinations.getSelectionModel()
                 .getSelectedItem());
-        
         tvDestinations.refresh();
     }
     
@@ -166,15 +271,13 @@ public class FXMLDocumentCreateRouteController {
             alert.setHeaderText("Is this the direction you want?: " + e.getName());
             
             Optional<ButtonType> okButton = alert.showAndWait();
-            if (okButton.isPresent() && okButton.get() == ButtonType.CANCEL) {
-                //nada
-            }else{
+            if (!okButton.isPresent() || okButton.get() != ButtonType.CANCEL) {
                 tfOriginInfo.setText(e.getName());
                 originJIC = e;
             }
         } catch (LogicBusinessException ex) {
             Logger.getLogger(FXMLDocumentCreateRouteController.class.getName()).log(Level.SEVERE, null, ex);
-        Alert alert=new Alert(Alert.AlertType.ERROR,
+            Alert alert=new Alert(Alert.AlertType.ERROR,
                             "We can't load data right now. Please try again later.",
                             ButtonType.OK);
             alert.showAndWait();
@@ -200,7 +303,7 @@ public class FXMLDocumentCreateRouteController {
             e = this.cliente.getDirection(tfDestination.getText());
         } catch (LogicBusinessException ex) {
             Logger.getLogger(FXMLDocumentCreateRouteController.class.getName()).log(Level.SEVERE, null, ex);
-        Alert alert=new Alert(Alert.AlertType.ERROR,
+            Alert alert=new Alert(Alert.AlertType.ERROR,
                             "We can't load data right now. Please try again later.",
                             ButtonType.OK);
             alert.showAndWait();
@@ -218,11 +321,9 @@ public class FXMLDocumentCreateRouteController {
         alert.setHeaderText("Is this the direction you want?: " + e.getName());
         
         Optional<ButtonType> okButton = alert.showAndWait();
-        if (okButton.isPresent() && okButton.get() == ButtonType.CANCEL) {    
-            //nada
-        }else{
-           tvDestinations.getItems().add(new DirectionTvBean(e.getName()));
-           directionsJIC.add(e);
+        if (!okButton.isPresent() || okButton.get() != ButtonType.CANCEL) {    
+            tvDestinations.getItems().add(new DirectionTvBean(e.getName()));
+            directionsJIC.add(e);
         }
         tvDestinations.refresh();
     }
@@ -258,9 +359,7 @@ public class FXMLDocumentCreateRouteController {
                 if(cbDontAssignYet.isSelected()){
                     cbAssignTo.setDisable(true);
                     delivery = null;
-                }else{
-                    cbAssignTo.setDisable(false);
-                }
+                }else cbAssignTo.setDisable(false);
             }
         });
         tcName.setCellValueFactory(new PropertyValueFactory<>("name"));
@@ -287,6 +386,7 @@ public class FXMLDocumentCreateRouteController {
             delivery = 
                 (User) cbAssignTo.getSelectionModel().getSelectedItem();    
         });
+        
     }
     
     /**
@@ -345,7 +445,19 @@ public class FXMLDocumentCreateRouteController {
                             ButtonType.OK);
             alert.showAndWait();
             return;
+        }else if(dpDeadLine.getValue() == null){
+           Alert alert=new Alert(Alert.AlertType.ERROR,
+                            "You must enter a deadline",
+                            ButtonType.OK);
+            alert.showAndWait();
+            return; 
         }
+        //I am actually making this because I had to implement a datepicker but
+        //I'm not doing anything with it:
+        deadline = dpDeadLine.getValue();
+        Instant instant = Instant.from(deadline.atStartOfDay(ZoneId.systemDefault()));
+        Date date = Date.from(instant);
+        
         //Here I set the route's data.
         Route route = new Route();
         route.setCreatedBy(admin);
@@ -355,12 +467,10 @@ public class FXMLDocumentCreateRouteController {
         else if(rdbtnFastest.isSelected()) route.setMode(Mode.FASTEST);
         else route.setMode(Mode.SHORTEST);
         
-        
         if(rdbtnCar.isSelected()) route.setTransportMode(TransportMode.CAR);
         else if(rdbtnCarHov.isSelected()) route.setTransportMode(TransportMode.CAR_HOV);
         else if(rdbtnPedestrian.isSelected()) route.setTransportMode(TransportMode.PEDESTRIAN);    
         else route.setTransportMode(TransportMode.TRUCK);
-        
         
         if(cbEnableTrafficMode.isSelected()) route.setTrafficMode(TrafficMode.ENABLED);
         else route.setTrafficMode(TrafficMode.DISABLED);
@@ -392,7 +502,7 @@ public class FXMLDocumentCreateRouteController {
     public void handleWindowClosing(WindowEvent event) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "");
         alert.setTitle("Close");
-        alert.setHeaderText("Are you sure that you want to close the application?");
+        alert.setHeaderText("Are you sure that you want to cancel the operation?");
         Optional<ButtonType> okButton = alert.showAndWait();
         if (okButton.isPresent() && okButton.get() == ButtonType.CANCEL) {    
             event.consume();

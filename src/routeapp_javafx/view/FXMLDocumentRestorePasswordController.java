@@ -32,7 +32,6 @@ public class FXMLDocumentRestorePasswordController {
     private Client cliente;
     private User delivery = null;
     
-    
     @FXML
     private Button btnRestorePassword;
      @FXML

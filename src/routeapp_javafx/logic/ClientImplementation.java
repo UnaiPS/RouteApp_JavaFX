@@ -26,6 +26,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import beans.User;
 import java.net.ProtocolException;
+import java.util.ResourceBundle;
 
 /**
  * This is the class that implements the Client methods.
@@ -54,7 +55,9 @@ public class ClientImplementation implements Client {
             String inline="";
             
             sitio = sitio.replace(" ", "%20");
-            URL url = new URL("https://geocoder.api.here.com/6.2/geocode.json?searchtext=" + sitio + "&app_id=w4M9GIVbS5uVCLiCyGKV&app_code=JOPGDZHGQJ7FpUVmbfm4KA");
+            ResourceBundle properties = ResourceBundle.getBundle("routeapp_javafx.logic.appid");
+                String appid = properties.getString("app_id");
+            URL url = new URL("https://geocoder.api.here.com/6.2/geocode.json?searchtext=" + sitio + appid + "&language=en-en");
             HttpURLConnection conn = (HttpURLConnection)url.openConnection();
             conn.setRequestMethod("GET"); 
             conn.connect();
@@ -188,8 +191,10 @@ public class ClientImplementation implements Client {
         consulta += "&mode=" + mode;
         
         try {
+            ResourceBundle properties = ResourceBundle.getBundle("routeapp_javafx.logic.appid");
+                String appid = properties.getString("app_id");
             String inline = "";
-            URL url = new URL("https://route.api.here.com/routing/7.2/calculateroute.json?app_id=w4M9GIVbS5uVCLiCyGKV&app_code=JOPGDZHGQJ7FpUVmbfm4KA" + consulta);
+            URL url = new URL("https://route.api.here.com/routing/7.2/calculateroute.json?" + consulta + appid);
             HttpURLConnection conn = (HttpURLConnection)url.openConnection();
             conn.setRequestMethod("GET"); 
             conn.connect();
