@@ -3,12 +3,14 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package beans;
+package client;
 
 /**
  *
- * @author 2dam
+ * @author Daira Eguzkiza
  */
-public enum Type {
-    WAYPOINT,ORIGIN,DESTINATION,GPS
+public class LogicBusinessException extends Exception {
+    public LogicBusinessException(String msg){
+        super(msg);
+    }
 }

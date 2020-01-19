@@ -8,6 +8,7 @@ package client;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.GenericType;
 
 /**
  * Jersey REST client generated for REST resource:CoordinateFacadeREST
@@ -33,18 +34,24 @@ public class ClientCoordinate {
         webTarget = client.target(BASE_URI).path("routeappjpa.coordinate");
     }
 
-    public <T> T findDirectionsByType(Class<T> responseType, String type) throws ClientErrorException {
+    public <T> T findDirectionsByType(String code, GenericType<T> responseType, String type) throws ClientErrorException {
         WebTarget resource = webTarget;
-        resource = resource.path(java.text.MessageFormat.format("direction/{0}", new Object[]{type}));
+        resource = resource.path(java.text.MessageFormat.format("direction/type/{0}/{1}", new Object[]{code,type}));
+        return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
+    }
+    
+    public <T> T findDirectionsByRoute(String code, GenericType<T> responseType, String route) throws ClientErrorException {
+        WebTarget resource = webTarget;
+        resource = resource.path(java.text.MessageFormat.format("direction/route/{0}/{1}", new Object[]{code,route}));
         return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
     }
 
+    public void markDestinationVisited(String code, Object requestEntity, String latitude, String longitude) throws ClientErrorException {
+        webTarget.path(java.text.MessageFormat.format("direction/visited/{0}/{1}/{2}", new Object[]{code,latitude,longitude})).request(javax.ws.rs.core.MediaType.APPLICATION_XML).put(javax.ws.rs.client.Entity.entity(requestEntity, javax.ws.rs.core.MediaType.APPLICATION_XML));
+    }
+    /*
     public void createDirection(Object requestEntity) throws ClientErrorException {
         webTarget.path("direction").request(javax.ws.rs.core.MediaType.APPLICATION_XML).post(javax.ws.rs.client.Entity.entity(requestEntity, javax.ws.rs.core.MediaType.APPLICATION_XML));
-    }
-
-    public void markDestinationVisited(Object requestEntity, String id) throws ClientErrorException {
-        webTarget.path(java.text.MessageFormat.format("direction/visited/{0}", new Object[]{id})).request(javax.ws.rs.core.MediaType.APPLICATION_XML).put(javax.ws.rs.client.Entity.entity(requestEntity, javax.ws.rs.core.MediaType.APPLICATION_XML));
     }
 
     public void createCoordinate(Object requestEntity) throws ClientErrorException {
@@ -56,7 +63,7 @@ public class ClientCoordinate {
         resource = resource.path(java.text.MessageFormat.format("type/{0}", new Object[]{type}));
         return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
     }
-
+    */
     public void close() {
         client.close();
     }

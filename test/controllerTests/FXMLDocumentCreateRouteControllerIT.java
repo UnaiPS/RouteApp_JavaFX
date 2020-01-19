@@ -7,7 +7,7 @@ import org.junit.runners.MethodSorters;
 import static org.testfx.api.FxAssert.verifyThat;
 import org.testfx.framework.junit.ApplicationTest;
 import static org.testfx.matcher.base.NodeMatchers.isVisible;
-import routeapp_javafx.RouteApp_JavaFX;
+//import routeapp_javafx.RouteApp_JavaFX;
 
 /**
  * The integration test for the FXMLDocumentCreateRouteController.
@@ -31,7 +31,7 @@ public class FXMLDocumentCreateRouteControllerIT extends ApplicationTest{
     
  
     @Override public void start(Stage stage) throws Exception {
-      new RouteApp_JavaFX().start(stage);
+      //new RouteApp_JavaFX().start(stage);
     }
     
     /**

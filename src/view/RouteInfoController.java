@@ -5,7 +5,7 @@
  */
 package view;
 
-import beans.Coordinate_Route;
+import model.Coordinate_Route;
 import client.Client;
 import client.ClientFactory;
 import java.io.IOException;
@@ -27,13 +27,14 @@ import javafx.scene.control.TextField;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import beans.Mode;
-import beans.Route;
-import beans.TrafficMode;
-import beans.TransportMode;
-import beans.User;
+import model.Mode;
+import model.Route;
+import model.TrafficMode;
+import model.TransportMode;
+import model.User;
 import client.ClientRoute;
 import client.UserRESTClient;
+import model.FullRoute;
 
 /**
  * FXML Controller class
@@ -52,7 +53,7 @@ public class RouteInfoController {
     
     private UserRESTClient userClient = new UserRESTClient();
     
-    private ClientRoute routeClient = new ClientRoute();
+    private Client client = ClientFactory.getClient();
     
     private Alert alert;
     
@@ -155,8 +156,11 @@ public class RouteInfoController {
         route.setName(routeName.getText());
         route.setTrafficMode(trafficMode.getValue());
         route.setTransportMode(transportMode.getValue());
+        FullRoute fullRoute = new FullRoute();
+        fullRoute.setDirections(null);
+        fullRoute.setRoute(route);
         try{
-            routeClient.edit(route);
+            client.editRoute(fullRoute);
             FXMLLoader loader = new FXMLLoader(getClass().getResource("Admin_Main_Menu.fxml"));
             Parent root = null;
             try {

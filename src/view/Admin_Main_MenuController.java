@@ -8,6 +8,7 @@ package view;
 import client.Client;
 import client.ClientFactory;
 import client.ClientRoute;
+import encryption.Hasher;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Optional;
@@ -17,6 +18,7 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -25,19 +27,22 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.PasswordField;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javax.ws.rs.core.GenericType;
-import beans.Route;
-import beans.User;
+import model.Route;
+import model.User;
 
 /**
  * FXML Controller class
@@ -56,7 +61,7 @@ public class Admin_Main_MenuController {
     
     private ArrayList<Route> routes = new ArrayList<Route>();
     
-    private ClientRoute client = new ClientRoute();
+    private Client client = ClientFactory.getClient();
     
     
     @FXML
@@ -151,8 +156,8 @@ public class Admin_Main_MenuController {
         colTraffMode.setCellValueFactory(new PropertyValueFactory<>("trafficMode"));
         colTransMode.setCellValueFactory(new PropertyValueFactory<>("transportMode"));
         
-        client.findAll(new GenericType<ArrayList<Route>>(){});
-        routes.addAll(client.findAll(new GenericType<ArrayList<Route>>(){}));
+        //client.findAllRoutes(new GenericType<ArrayList<Route>>(){});
+        routes.addAll(client.findAllRoutes());
         ObservableList<Route> routesList = FXCollections.observableArrayList(routes);
         tblRoute.setItems(routesList);
         
@@ -193,7 +198,7 @@ public class Admin_Main_MenuController {
                 Optional<ButtonType> result = alert.showAndWait();
                 if(result.get()==ButtonType.YES){
                     try{
-                        client.remove(tblRoute.getSelectionModel().getSelectedItem().getId().toString());
+                        client.removeRoute(tblRoute.getSelectionModel().getSelectedItem().getId().toString());
                         tblRoute.getItems().remove(tblRoute.getSelectionModel().getSelectedItem());
                         tblRoute.refresh();
                     }catch(Exception ex){
@@ -280,6 +285,54 @@ public class Admin_Main_MenuController {
     
     public void handleBtnProfile(ActionEvent e){
         LOGGER.info("Profile button pressed, opening new window...");
+        TextInputDialog dialog = new TextInputDialog("");
+        dialog.setTitle("Password confirmation");
+        dialog.setHeaderText("Identity confirmation by password requiered.");
+        dialog.setGraphic(null);
+        
+        
+        PasswordField pf = new PasswordField();
+        pf.setPromptText("Password");
+        
+
+        HBox hBox = new HBox();
+        hBox.getChildren().add(pf);
+        hBox.setPadding(new Insets(20));
+
+        dialog.setResultConverter(dialogButton -> {
+                if (dialogButton == ButtonType.OK )
+                    return pf.getText();
+                else
+                    return null;
+        });
+
+        dialog.getDialogPane().setContent(hBox);
+        Optional<String> result = dialog.showAndWait();
+        if (result.isPresent()){
+            try {
+                if (Hasher.encrypt(result.get()).equals(user.getPassword())) {
+                    Stage stage = new Stage();
+                    stage.initModality(Modality.APPLICATION_MODAL);
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource("UserProfile.fxml"));
+                    Parent root = (Parent) loader.load();
+                    FXMLDocumentControllerUserProfile viewController = loader.getController();
+                    viewController.setUser(user);
+                    viewController.setStage(stage);
+                    viewController.initStage(root);
+                } else {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Error");
+                    alert.setHeaderText("Incorrect password.");
+                    alert.show();
+                }
+            } catch (Exception ex) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setHeaderText("An error has ocurred.");
+                alert.show();
+                LOGGER.severe("Error exception: "+ex.getLocalizedMessage());
+            }
+        }
     }
     
     public void handleBtnLogOut(ActionEvent e){
