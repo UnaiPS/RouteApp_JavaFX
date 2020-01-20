@@ -30,6 +30,7 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.util.StringConverter;
 import client.Client;
+import client.ClientFactory;
 import model.Direction;
 import model.Mode;
 import model.Route;
@@ -40,21 +41,29 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import client.LogicBusinessException;
+import java.io.IOException;
+import javafx.fxml.FXMLLoader;
+import javafx.stage.Modality;
 import model.Privilege;
 
 /**
  *
- * @author Daira Eguzkiza
+ * @author Daira Eguzkiza, Unai Pérez Sánchez
  */
 public class FXMLDocumentCreateRouteController {
+    private Logger LOGGER = Logger.getLogger("view.FXMLDocumentCreateRouteController");
     private Stage stage;
-    private Client cliente;
+    private Client cliente = ClientFactory.getClient();
     private User delivery = null;
-    private User admin;
+    private User user;
     private ArrayList<Direction> directionsJIC;
     private Direction originJIC;
     
     private ObservableList directions;
+    
+    final ToggleGroup groupMode = new ToggleGroup();
+    
+    final ToggleGroup groupTransport = new ToggleGroup();
     
     
     @FXML
@@ -100,18 +109,6 @@ public class FXMLDocumentCreateRouteController {
     private TableView tvDestinations;
     @FXML
     private TableColumn tcName;
-    
-    final ToggleGroup groupMode = new ToggleGroup();
-    
-    final ToggleGroup groupTransport = new ToggleGroup();
-    
-    public void setStage(Stage stage) {
-        this.stage = stage;
-    }
-    
-    public void setUser(User user) {
-        this.admin = user;
-    }
 
     /**
      * Initializes the stage.
@@ -128,25 +125,15 @@ public class FXMLDocumentCreateRouteController {
     }
     
     /**
-     * Sets the client with the one sent from the main method.
-     * @param client 
-     */
-    public void setClient(Client client) {
-        cliente = client;
-     }
-    
-    /**
      * Deletes the row of the table of destinations that is selected when the
      * button delete is clicked on.
      * @param event 
      */
-    @FXML
     private void handleDeleteButtonAction(ActionEvent event){
         int ind = tvDestinations.getSelectionModel().getSelectedIndex();
         directionsJIC.remove(ind);
         tvDestinations.getItems().remove(tvDestinations.getSelectionModel()
                 .getSelectedItem());
-        
         tvDestinations.refresh();
     }
     
@@ -156,7 +143,6 @@ public class FXMLDocumentCreateRouteController {
      * the data will be loaded on the disabled "Origin" textfield. 
      * @param event 
      */
-    @FXML
     private void handleOriginButtonAction(ActionEvent event){
         try {
             Direction e = this.cliente.getDirection(tfOrigin.getText());
@@ -172,18 +158,17 @@ public class FXMLDocumentCreateRouteController {
                 originJIC = e;
             }
         } catch (LogicBusinessException ex) {
-            Logger.getLogger(FXMLDocumentCreateRouteController.class.getName()).log(Level.SEVERE, null, ex);
-        Alert alert=new Alert(Alert.AlertType.ERROR,
-                            "We can't load data right now. Please try again later.",
-                            ButtonType.OK);
+            LOGGER.severe("Error: "+ex.getLocalizedMessage());
+            Alert alert=new Alert(Alert.AlertType.ERROR,
+                    "We can't load data right now. Please try again later.",
+                    ButtonType.OK);
             alert.showAndWait();
         }catch(IndexOutOfBoundsException ex){
             Alert alert=new Alert(Alert.AlertType.ERROR,
-                            "We couldn't find any direction with the entered data.",
-                            ButtonType.OK);
+                    "We couldn't find any direction with the entered data.",
+                    ButtonType.OK);
             alert.showAndWait();
         }
-        
     }
     
     /**
@@ -192,16 +177,15 @@ public class FXMLDocumentCreateRouteController {
      * the data will be loaded on the destinations table.
      * @param event 
      */
-    @FXML
     private void handleDestinationButtonAction(ActionEvent event){
         Direction e = new Direction();
         try {
             e = this.cliente.getDirection(tfDestination.getText());
         } catch (LogicBusinessException ex) {
-            Logger.getLogger(FXMLDocumentCreateRouteController.class.getName()).log(Level.SEVERE, null, ex);
-        Alert alert=new Alert(Alert.AlertType.ERROR,
-                            "We can't load data right now. Please try again later.",
-                            ButtonType.OK);
+            LOGGER.severe("Error: "+ex.getLocalizedMessage());
+            Alert alert=new Alert(Alert.AlertType.ERROR,
+                    "We can't load data right now. Please try again later.",
+                    ButtonType.OK);
             alert.showAndWait();
             return;
         }catch(IndexOutOfBoundsException ex){
@@ -242,6 +226,12 @@ public class FXMLDocumentCreateRouteController {
         rdbtnPedestrian.setToggleGroup(groupTransport);
         rdbtnTruck.setToggleGroup(groupTransport);
         directionsJIC = new ArrayList<Direction>();
+        
+        btnCheckDestination.setOnAction(this::handleDestinationButtonAction);
+        btnCheckOrigin.setOnAction(this::handleOriginButtonAction);
+        btnDelete.setOnAction(this::handleDeleteButtonAction);
+        btnReturnToMenu.setOnAction(this::handleReturnToMenuAction);
+        btnSaveRoute.setOnAction(this::handleSaveButtonAction);
         
         cbDontAssignYet.selectedProperty().addListener(new ChangeListener<Boolean>() {
             /**
@@ -294,7 +284,6 @@ public class FXMLDocumentCreateRouteController {
      * to the database to save it for it to be used later on.
      * @param event 
      */
-    @FXML
     private void handleSaveButtonAction(ActionEvent event){
         if(tfName.getText().length()>30){
             Alert alert=new Alert(Alert.AlertType.ERROR,
@@ -347,7 +336,7 @@ public class FXMLDocumentCreateRouteController {
         }
         //Here I set the route's data.
         Route route = new Route();
-        route.setCreatedBy(admin);
+        route.setCreatedBy(user);
         route.setAssignedTo(delivery);
         route.setName(tfName.getText());
         if(rdbtnBalanced.isSelected()) route.setMode(Mode.BALANCED);
@@ -397,4 +386,40 @@ public class FXMLDocumentCreateRouteController {
             event.consume();
         }
     }  
+    
+    public void handleReturnToMenuAction(ActionEvent action){
+        Alert alert;
+        try{
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("Admin_Main_Menu.fxml"));
+            Parent root = null;
+            try {
+                root = (Parent) loader.load();
+            } catch (IOException ex) {
+                LOGGER.severe("Error: "+ex.getLocalizedMessage());
+            }
+            Admin_Main_MenuController viewController = loader.getController();
+            Stage stage = new Stage();
+            stage.initModality(Modality.NONE);
+            viewController.setUser(user);
+            viewController.setStage(stage);
+            viewController.initStage(root);
+            this.stage.close();
+        }catch(Exception ex){
+            LOGGER.severe("Error: "+ex.getLocalizedMessage());
+            alert = new Alert(Alert.AlertType.ERROR, "Unexpected error happened");
+            alert.showAndWait();
+        }
+    }
+    
+    public void setStage(Stage stage) {
+        this.stage = stage;
+    }
+    
+    public void setUser(User user) {
+        this.user = user;
+    }
+    
+    public User getUser(){
+        return this.user;
+    }
 }

@@ -274,8 +274,6 @@ public class Admin_Main_MenuController {
             
             Stage stage = new Stage();
             stage.initModality(Modality.NONE);
-            Client client = ClientFactory.getClient();
-            viewController.setClient(client);
             viewController.setUser(user);
             viewController.setStage(stage);
             viewController.initStage(root);

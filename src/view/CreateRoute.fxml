@@ -17,7 +17,7 @@
       <Text id="lblAssignTo" fx:id="lblAssignTo" layoutX="114.0" layoutY="192.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Assign To:" />
       <ComboBox id="cbAssignTo" fx:id="cbAssignTo" layoutX="210.0" layoutY="175.0" prefHeight="25.0" prefWidth="286.0" />
       <Text id="lblDestinationInfo" fx:id="lblDestinationInfo" layoutX="115.0" layoutY="417.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Destination/s:" />
-      <Button id="btnCheckOrigin" fx:id="btnCheckOrigin" onAction="#handleOriginButtonAction" layoutX="588.0" layoutY="95.0" mnemonicParsing="false" text="Check" />
+      <Button id="btnCheckOrigin" fx:id="btnCheckOrigin" layoutX="588.0" layoutY="95.0" mnemonicParsing="false" text="Check" />
       <Button id="btnReturnToMenu" fx:id="btnReturnToMenu" layoutX="920.0" layoutY="43.0" mnemonicParsing="false" text="Return to main menu" />
       <TableView id="tvDestinations" fx:id="tvDestinations" layoutX="104.0" layoutY="436.0" prefHeight="378.0" prefWidth="785.0">
         <columns>
@@ -35,11 +35,11 @@
          </columnResizePolicy>
       </TableView>
       <CheckBox id="cbDontAssignYet" fx:id="cbDontAssignYet" layoutX="529.0" layoutY="179.0" mnemonicParsing="false" text="Don't Assign Yet" />
-      <Button id="btnDelete" fx:id="btnDelete" onAction="#handleDeleteButtonAction" layoutX="920.0" layoutY="406.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="130.0" text="Delete" />
-      <Button id="btnSaveRoute" fx:id="btnSaveRoute" onAction="#handleSaveButtonAction" layoutX="945.0" layoutY="765.0" mnemonicParsing="false" text="Save Route" />
+      <Button id="btnDelete" fx:id="btnDelete" layoutX="920.0" layoutY="406.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="130.0" text="Delete" />
+      <Button id="btnSaveRoute" fx:id="btnSaveRoute"  layoutX="945.0" layoutY="765.0" mnemonicParsing="false" text="Save Route" />
       <Text id="lblDestination" fx:id="lblDestination" layoutX="114.0" layoutY="151.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Destination:" />
       <TextField id="tfDestination" fx:id="tfDestination" layoutX="210.0" layoutY="135.0" prefHeight="25.0" prefWidth="357.0" />
-      <Button id="btnCheckDestination" fx:id="btnCheckDestination" onAction="#handleDestinationButtonAction" layoutX="588.0" layoutY="135.0" mnemonicParsing="false" text="Check" />
+      <Button id="btnCheckDestination" fx:id="btnCheckDestination" layoutX="588.0" layoutY="135.0" mnemonicParsing="false" text="Check" />
       <Text id="lblOriginInfo" fx:id="lblOriginInfo" layoutX="115.0" layoutY="391.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Origin:" />
       <TextField id="tfOriginInfo" fx:id="tfOriginInfo" disable="true" layoutX="209.0" layoutY="375.0" prefHeight="25.0" prefWidth="357.0" />
       <Text id="lblName" fx:id="lblName" layoutX="114.0" layoutY="70.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Name:" />
