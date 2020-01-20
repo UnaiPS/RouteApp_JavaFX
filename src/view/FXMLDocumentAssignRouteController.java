@@ -26,16 +26,22 @@ import model.User;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import client.LogicBusinessException;
+import java.io.IOException;
+import javafx.fxml.FXMLLoader;
+import javafx.stage.Modality;
 import model.Privilege;
 
 /**
  *
- * @author Daira Eguzkiza
+ * @author Daira Eguzkiza, Unai Pérez Sánchez
  */
 public class FXMLDocumentAssignRouteController {
     private Stage stage;
     private Client cliente = ClientFactory.getClient();
+    private User user;
     private User delivery = null;
+    private Route route;
+    private Logger LOGGER = Logger.getLogger("retoLogin.view.FXMLDocumentAssignRouteController");
     
     
     @FXML
@@ -68,14 +74,6 @@ public class FXMLDocumentAssignRouteController {
     }
     
     /**
-     * Sets the client with the one sent from the main method.
-     * @param client 
-     */
-    public void setClient(Client client) {
-        cliente = client;
-     }
-    
-    /**
      * Sets everything the controller needs to be functional. For example, loads
      * the delivery users' list into the combobox.
      * @param event 
@@ -95,6 +93,10 @@ public class FXMLDocumentAssignRouteController {
                     return null;
                 }
             });
+            btnSaveChanges.setOnAction(this::handleSaveButtonAction);
+            tfEstimatedTime.setText(route.getEstimatedTime().toString());
+            tfName.setText(route.getName());
+            tfTotalDistance.setText(route.getTotalDistance().toString());
             cbAssignTo.setPromptText("Delivery man/woman");
             cbAssignTo.getItems().addAll(cliente.findUsersByPrivilege(Privilege.USER));
             cbAssignTo.setOnAction((Event ev) -> {
@@ -119,14 +121,38 @@ public class FXMLDocumentAssignRouteController {
                             "You haven't entered the user!!",
                             ButtonType.OK);
             alert.showAndWait();
-            return;
-        }
-        Route route = new Route();
-        route.setAssignedTo(delivery);
-         Alert alert=new Alert(Alert.AlertType.CONFIRMATION,
+        }else{
+            route.setAssignedTo(delivery);
+            Alert alert=new Alert(Alert.AlertType.CONFIRMATION,
                             "The route has been assigned.",
                             ButtonType.OK);
             alert.showAndWait();
+            try{
+                route.setCoordinates(null);
+                cliente.editRoute(route);
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("Route Info.fxml"));
+                Parent root = null;
+                try {
+                    root = (Parent) loader.load();
+                } catch (IOException ex) {
+                    LOGGER.severe("Error: "+ex.getLocalizedMessage());
+                }
+                RouteInfoController viewController = loader.getController();
+                viewController.setRoute(route);
+                Stage stage = new Stage();
+                stage.initModality(Modality.NONE);
+                viewController.setUser(user);
+                viewController.setStage(stage);
+                LOGGER.warning("Parent root: "+root);
+                viewController.initStage(root);
+                this.stage.close();
+            }catch(Exception ex){
+                LOGGER.severe("Error: "+ex.getLocalizedMessage());
+                alert = new Alert(Alert.AlertType.ERROR, "Unexpected error happened");
+                alert.showAndWait();
+            }
+        }
+        
     }
     
     /**
@@ -136,13 +162,49 @@ public class FXMLDocumentAssignRouteController {
     public void handleWindowClosing(WindowEvent event) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "");
         alert.setTitle("Close");
-        alert.setHeaderText("Are you sure that you want to close the application?");
+        alert.setHeaderText("Are you sure that you want to discard the changes?");
         Optional<ButtonType> okButton = alert.showAndWait();
         if (okButton.isPresent() && okButton.get() == ButtonType.CANCEL) {    
             event.consume();
+        }else if(okButton.get()==ButtonType.YES){
+            try{
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("Route Info.fxml"));
+                Parent root = null;
+                try {
+                    root = (Parent) loader.load();
+                } catch (IOException ex) {
+                    LOGGER.severe("Error: "+ex.getLocalizedMessage());
+                }
+                RouteInfoController viewController = loader.getController();
+                Stage stage = new Stage();
+                stage.initModality(Modality.NONE);
+                viewController.setUser(user);
+                viewController.setRoute(route);
+                viewController.setStage(stage);
+                viewController.initStage(root);
+                this.stage.close();
+            }catch(Exception ex){
+                LOGGER.severe("Error: "+ex.getLocalizedMessage());
+                alert = new Alert(Alert.AlertType.ERROR, "Unexpected error happened");
+                alert.showAndWait();
+            }
         }
     }
     
+    public Route getRoute(){
+        return this.route;
+    }
     
+    public void setRoute(Route route){
+        this.route = route;
+    }
+    
+    public User getUser(){
+        return this.user;
+    }
+    
+    public void setUser(User user){
+        this.user = user;
+    }
     
 }

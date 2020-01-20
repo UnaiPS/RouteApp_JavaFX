@@ -50,7 +50,7 @@ import model.Type;
  */
 public class RouteInfoController {
     
-    private Logger LOGGER = Logger.getLogger("retoLogin.view.FXMLDocumentControllerSignUp");
+    private Logger LOGGER = Logger.getLogger("view.RouteInfoController");
     
     private Stage stage;
     
@@ -120,7 +120,6 @@ public class RouteInfoController {
      */
     public void initStage(Parent root) {
         LOGGER.info("Initializing Route Info stage");
-        LOGGER.info("Coordinates size: "+route.getCoordinates().size());
         Scene scene = new Scene(root);
         stage.setScene(scene);
         /*
@@ -165,12 +164,6 @@ public class RouteInfoController {
         route.setName(routeName.getText());
         route.setTrafficMode(trafficMode.getValue());
         route.setTransportMode(transportMode.getValue());
-//        for(int i = 0; i<directions.size(); i++){
-//            directions.get(i).setCoordinate(null);
-//        }
-//        FullRoute fullRoute = new FullRoute();
-//        fullRoute.setDirections(directions.stream().collect(Collectors.toSet()));
-//        fullRoute.setRoute(route);
         try{
             client.editRoute(route);
             FXMLLoader loader = new FXMLLoader(getClass().getResource("Admin_Main_Menu.fxml"));
@@ -205,11 +198,13 @@ public class RouteInfoController {
             }
             FXMLDocumentAssignRouteController viewController = loader.getController();
             Stage stage = new Stage();
-            stage.initModality(Modality.APPLICATION_MODAL);
-            Client client = ClientFactory.getClient();
-            viewController.setClient(client);
+            stage.initModality(Modality.NONE);
             viewController.setStage(stage);
+            viewController.setRoute(route);
+            viewController.setUser(user);
             viewController.initStage(root);
+            this.stage.close();
+            
         } catch (Exception ex) {
             alert = new Alert(Alert.AlertType.ERROR, "Something went wrong opening Assign Route window, please try later or restart the programm");
             alert.setTitle("Something went wrong");
@@ -279,6 +274,10 @@ public class RouteInfoController {
     
     public void setRoute(Route route){
         this.route=route;
+    }
+    
+    public Route getRoute(){
+        return this.route;
     }
     /**
      * Setter for the stage
