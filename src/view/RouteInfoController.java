@@ -32,9 +32,16 @@ import model.Route;
 import model.TrafficMode;
 import model.TransportMode;
 import model.User;
-import client.ClientRoute;
 import client.UserRESTClient;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.scene.control.cell.PropertyValueFactory;
+import model.Coordinate;
+import model.Direction;
 import model.FullRoute;
+import model.Type;
 
 /**
  * FXML Controller class
@@ -59,6 +66,8 @@ public class RouteInfoController {
     
     private User user;
     
+    private List<Direction> directions;
+    
     @FXML
     private TextField routeName;
     @FXML
@@ -82,11 +91,11 @@ public class RouteInfoController {
     @FXML
     private Button btnSaveChanges;
     @FXML
-    private TableView<?> directionsInfo;
+    private TableView<Direction> directionsInfo;
     @FXML
-    private TableColumn<?, ?> tblType;
+    private TableColumn<Direction, Type> tblType;
     @FXML
-    private TableColumn<?, ?> tblContry;
+    private TableColumn<?, ?> tblCountry;
     @FXML
     private TableColumn<?, ?> tblState;
     @FXML
@@ -156,11 +165,14 @@ public class RouteInfoController {
         route.setName(routeName.getText());
         route.setTrafficMode(trafficMode.getValue());
         route.setTransportMode(transportMode.getValue());
-        FullRoute fullRoute = new FullRoute();
-        fullRoute.setDirections(null);
-        fullRoute.setRoute(route);
+//        for(int i = 0; i<directions.size(); i++){
+//            directions.get(i).setCoordinate(null);
+//        }
+//        FullRoute fullRoute = new FullRoute();
+//        fullRoute.setDirections(directions.stream().collect(Collectors.toSet()));
+//        fullRoute.setRoute(route);
         try{
-            client.editRoute(fullRoute);
+            client.editRoute(route);
             FXMLLoader loader = new FXMLLoader(getClass().getResource("Admin_Main_Menu.fxml"));
             Parent root = null;
             try {
@@ -230,6 +242,21 @@ public class RouteInfoController {
     }
     
     public void handleWindowShowing(WindowEvent e){
+        tblType.setCellValueFactory(cellData -> new SimpleObjectProperty(cellData.getValue().getCoordinate().getType()));
+        tblCountry.setCellValueFactory(new PropertyValueFactory<>("country"));
+        tblState.setCellValueFactory(new PropertyValueFactory<>("state"));
+        tblCounty.setCellValueFactory(new PropertyValueFactory<>("county"));
+        tblCity.setCellValueFactory(new PropertyValueFactory<>("city"));
+        tblDistrict.setCellValueFactory(new PropertyValueFactory<>("district"));
+        tblStreet.setCellValueFactory(new PropertyValueFactory<>("street"));
+        tblHouseNumber.setCellValueFactory(new PropertyValueFactory<>("houseNumber"));
+        tblPostalCode.setCellValueFactory(new PropertyValueFactory<>("postalCode"));
+        
+        directions = client.findDirectionsByRoute(route.getId().toString());
+        ObservableList<Direction> directionList = FXCollections.observableArrayList(directions);
+        
+        directionsInfo.setItems(directionList);
+        
         routeName.setText(route.getName());
         assignedTo.setText(route.getAssignedTo().getFullName());
         totalDistance.setText(route.getTotalDistance().toString());
@@ -240,6 +267,8 @@ public class RouteInfoController {
         mode.setValue(route.getMode());
         transportMode.setValue(route.getTransportMode());
         trafficMode.setValue(route.getTrafficMode());
+        
+        
         
         
     }

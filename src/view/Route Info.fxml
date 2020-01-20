@@ -34,7 +34,7 @@
       <TableView id="directionsInfo" fx:id="directionsInfo" layoutX="50.0" layoutY="213.0" prefHeight="421.0" prefWidth="980.0">
          <columns>
             <TableColumn id="tblType" fx:id="tblType" prefWidth="75.0" text="Type" />
-            <TableColumn id="tblContry" fx:id="tblContry" prefWidth="75.0" text="Country" />
+            <TableColumn id="tblCountry" fx:id="tblCountry" prefWidth="75.0" text="Country" />
             <TableColumn id="tblState" fx:id="tblState" prefWidth="75.0" text="State" />
             <TableColumn id="tblCounty" fx:id="tblCounty" prefWidth="75.0" text="County" />
             <TableColumn id="tblCity" fx:id="tblCity" prefWidth="75.0" text="City" />

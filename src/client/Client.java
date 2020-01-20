@@ -26,7 +26,7 @@ public interface Client {
 
     public void createRoute(FullRoute fullRoute);
     
-    public void editRoute(FullRoute fullRoute);
+    public void editRoute(Route route);
     
     public Route findRoute(String routeId);
     
@@ -70,5 +70,5 @@ public interface Client {
     
     public Route getRoute(ArrayList<String> coords, Route route) throws LogicBusinessException;
     
-    public int restorePassword(String email, String login) throws LogicBusinessException;
+    //public int restorePassword(String email, String login) throws LogicBusinessException;
 }

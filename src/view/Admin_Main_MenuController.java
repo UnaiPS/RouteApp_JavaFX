@@ -175,7 +175,12 @@ public class Admin_Main_MenuController {
     
     public void handleCloseMenuItem(ActionEvent event){
         LOGGER.info("Close Menu Item pressed");
-        stage.close();
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure that you want to log out?",ButtonType.YES,ButtonType.NO);
+        Optional<ButtonType> result = alert.showAndWait();
+        if(result.get()==ButtonType.YES){
+            stage.close();
+        }
+        
     }
     
     public void handleAboutMenuItem(ActionEvent event){
@@ -319,6 +324,7 @@ public class Admin_Main_MenuController {
                     viewController.setUser(user);
                     viewController.setStage(stage);
                     viewController.initStage(root);
+                    this.stage.close();
                 } else {
                     Alert alert = new Alert(Alert.AlertType.ERROR);
                     alert.setTitle("Error");
@@ -337,7 +343,11 @@ public class Admin_Main_MenuController {
     
     public void handleBtnLogOut(ActionEvent e){
         LOGGER.info("Log Out button pressed, returning to the Login window...");
-        
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure that you want to log out?",ButtonType.YES,ButtonType.NO);
+        Optional<ButtonType> result = alert.showAndWait();
+        if(result.get()==ButtonType.YES){
+            stage.close();
+        }
     }
     
     public void handleWindowShowing(WindowEvent e){

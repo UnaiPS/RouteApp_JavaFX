@@ -100,14 +100,12 @@ public class FXMLDocumentRestorePasswordController {
             alert.showAndWait();
        }else{
            try {
-               int e = cliente.restorePassword(tfEmail.getText(), tfLogin.getText());
-               if(e == 200){
-                   Alert alert=new Alert(Alert.AlertType.INFORMATION,
-                           "An email has been sent with your new password, please try to log in again.",
-                           ButtonType.OK);
-                   alert.showAndWait();
-               }
-           } catch (LogicBusinessException ex) {
+               User user = new User();
+               user.setEmail(tfEmail.getText());
+               user.setLogin(tfLogin.getText());
+               cliente.forgottenPassword(user);
+               
+           } catch (Exception ex) {
                Logger.getLogger(FXMLDocumentRestorePasswordController.class.getName()).log(Level.SEVERE, null, ex);
                Alert alert=new Alert(Alert.AlertType.INFORMATION,
                            "Error trying to change your passsword. Please check the data you've entered is okay.",

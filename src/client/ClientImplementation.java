@@ -48,7 +48,7 @@ import org.json.simple.parser.JSONParser;
 public class ClientImplementation implements Client {
 
     private static final Logger LOGGER = Logger
-            .getLogger("retoLogin.control.ClientImplementation");
+            .getLogger("client.ClientImplementation");
     private String code;
     private ClientRoute clientRoute;
     private ClientCoordinate clientCoordinate;
@@ -87,9 +87,10 @@ public class ClientImplementation implements Client {
     }
 
     @Override
-    public void editRoute(FullRoute fullRoute) {
+    public void editRoute(Route route) {
         try {
-            clientRoute.edit(getSessionCode(), fullRoute);
+            LOGGER.warning("Client implementation: "+route.toString());
+            clientRoute.edit(getSessionCode(), route);
         } catch (NotAuthorizedException ex) {
             //TODO
         } catch (ForbiddenException ex) {
@@ -288,7 +289,7 @@ public class ClientImplementation implements Client {
     public User findUserByLogin(String userLogin) {
         User result = null;
         try {
-            result = clientUser.find(getSessionCode(), User.class, userLogin);
+            result = clientUser.findAccountByLogin(getSessionCode(), User.class, userLogin);
         } catch (NotAuthorizedException ex) {
             //TODO
         } catch (ForbiddenException ex) {
@@ -352,7 +353,7 @@ public class ClientImplementation implements Client {
     @Override
     public void forgottenPassword(User userData) {
         try {
-            clientUser.forgottenpasswd(userData.getLogin(), userData.getEmail());
+            clientUser.forgottenpasswd(userData.getEmail(), userData.getLogin());
         } catch (InternalServerErrorException ex) {
             //TODO
         } catch (ServiceUnavailableException ex) {
@@ -532,19 +533,19 @@ public class ClientImplementation implements Client {
         return route;
     }
 
-    @Override
-    public int restorePassword(String email, String login) throws LogicBusinessException {
-        try {
-            UserRESTClient prueba = new UserRESTClient();
-            int result = prueba.forgottenpasswd(int.class, email, login);
-            return result;
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE,
-                    "UsersManager: Exception restoring password, {0}",
-                    e.getMessage());
-            throw new LogicBusinessException("Error restoring the password:\n" + e
-                    .getMessage());
-        }
-
-    }
+//    @Override
+//    public int restorePassword(String email, String login) throws LogicBusinessException {
+//        try {
+//            
+//            int result = clientUser.forgottenpasswd(int.class, email, login);
+//            return result;
+//        } catch (Exception e) {
+//            LOGGER.log(Level.SEVERE,
+//                    "UsersManager: Exception restoring password, {0}",
+//                    e.getMessage());
+//            throw new LogicBusinessException("Error restoring the password:\n" + e
+//                    .getMessage());
+//        }
+//
+//    }
 }
