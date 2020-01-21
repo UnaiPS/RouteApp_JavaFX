@@ -5,25 +5,43 @@
  */
 package view;
 
+import model.Coordinate_Route;
+import client.Client;
+import client.ClientFactory;
+import java.io.IOException;
 import java.util.logging.Logger;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import model.Mode;
 import model.Route;
 import model.TrafficMode;
 import model.TransportMode;
+import model.User;
+import client.UserRESTClient;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.scene.control.cell.PropertyValueFactory;
+import model.Coordinate;
+import model.Direction;
+import model.FullRoute;
+import model.Type;
 
 /**
  * FXML Controller class
@@ -32,13 +50,23 @@ import model.TransportMode;
  */
 public class RouteInfoController {
     
-    private Logger LOGGER = Logger.getLogger("retoLogin.view.FXMLDocumentControllerSignUp");
+    private Logger LOGGER = Logger.getLogger("view.RouteInfoController");
     
     private Stage stage;
     
     private Route route;
     
     private ObservableList<Route> routes;
+    
+    private UserRESTClient userClient = new UserRESTClient();
+    
+    private Client client = ClientFactory.getClient();
+    
+    private Alert alert;
+    
+    private User user;
+    
+    private List<Direction> directions;
     
     @FXML
     private TextField routeName;
@@ -63,11 +91,11 @@ public class RouteInfoController {
     @FXML
     private Button btnSaveChanges;
     @FXML
-    private TableView<?> directionsInfo;
+    private TableView<Direction> directionsInfo;
     @FXML
-    private TableColumn<?, ?> tblType;
+    private TableColumn<Direction, Type> tblType;
     @FXML
-    private TableColumn<?, ?> tblContry;
+    private TableColumn<?, ?> tblCountry;
     @FXML
     private TableColumn<?, ?> tblState;
     @FXML
@@ -92,9 +120,7 @@ public class RouteInfoController {
      */
     public void initStage(Parent root) {
         LOGGER.info("Initializing Route Info stage");
-        
         Scene scene = new Scene(root);
-        
         stage.setScene(scene);
         /*
         The window will not be resizable
@@ -105,6 +131,8 @@ public class RouteInfoController {
         stage.setOnCloseRequest(this::handleWindowClosing);
         
         btnReturnToMainMenu.setOnAction(this::handlebtnReturnToMainMenu);
+        btnUpdateAssingRoute.setOnAction(this::handlebtnUpdateAssignRoute);
+        btnSaveChanges.setOnAction(this::handlebtnSaveChanges);
         
         ObservableList<Mode> modes = FXCollections.observableArrayList();
         modes.add(Mode.FASTEST);
@@ -129,11 +157,101 @@ public class RouteInfoController {
         stage.show();
     }
     
+    public void handlebtnSaveChanges(ActionEvent e){
+        route.setCoordinates(null);
+        route.setAssignedTo(route.getAssignedTo());
+        route.setMode(mode.getValue());
+        route.setName(routeName.getText());
+        route.setTrafficMode(trafficMode.getValue());
+        route.setTransportMode(transportMode.getValue());
+        try{
+            client.editRoute(route);
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("Admin_Main_Menu.fxml"));
+            Parent root = null;
+            try {
+                root = (Parent) loader.load();
+            } catch (IOException ex) {
+                LOGGER.severe("Error: "+ex.getLocalizedMessage());
+            }
+            Admin_Main_MenuController viewController = loader.getController();
+            Stage stage = new Stage();
+            stage.initModality(Modality.NONE);
+            viewController.setUser(user);
+            viewController.setStage(stage);
+            viewController.initStage(root);
+            this.stage.close();
+        }catch(Exception ex){
+            LOGGER.severe("Error: "+ex.getLocalizedMessage());
+            alert = new Alert(Alert.AlertType.ERROR, "Unexpected error happened");
+            alert.showAndWait();
+        }
+    }
+    
+    public void handlebtnUpdateAssignRoute(ActionEvent e){
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("AssignRoute.fxml"));
+            Parent root = null;
+            try {
+                root = (Parent) loader.load();
+            } catch (IOException ex) {
+                LOGGER.severe("Error: "+ex.getLocalizedMessage());
+            }
+            FXMLDocumentAssignRouteController viewController = loader.getController();
+            Stage stage = new Stage();
+            stage.initModality(Modality.NONE);
+            viewController.setStage(stage);
+            viewController.setRoute(route);
+            viewController.setUser(user);
+            viewController.initStage(root);
+            this.stage.close();
+            
+        } catch (Exception ex) {
+            alert = new Alert(Alert.AlertType.ERROR, "Something went wrong opening Assign Route window, please try later or restart the programm");
+            alert.setTitle("Something went wrong");
+            alert.showAndWait();
+            LOGGER.severe(ex.getLocalizedMessage());
+        }
+    }
+    
     public void handlebtnReturnToMainMenu(ActionEvent e){
-        stage.close();
+         try{
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("Admin_Main_Menu.fxml"));
+            Parent root = null;
+            try {
+                root = (Parent) loader.load();
+            } catch (IOException ex) {
+                LOGGER.severe("Error: "+ex.getLocalizedMessage());
+            }
+            Admin_Main_MenuController viewController = loader.getController();
+            Stage stage = new Stage();
+            stage.initModality(Modality.NONE);
+            viewController.setUser(user);
+            viewController.setStage(stage);
+            viewController.initStage(root);
+            this.stage.close();
+        }catch(Exception ex){
+            LOGGER.severe("Error: "+ex.getLocalizedMessage());
+            alert = new Alert(Alert.AlertType.ERROR, "Unexpected error happened");
+            alert.showAndWait();
+        }
     }
     
     public void handleWindowShowing(WindowEvent e){
+        tblType.setCellValueFactory(cellData -> new SimpleObjectProperty(cellData.getValue().getCoordinate().getType()));
+        tblCountry.setCellValueFactory(new PropertyValueFactory<>("country"));
+        tblState.setCellValueFactory(new PropertyValueFactory<>("state"));
+        tblCounty.setCellValueFactory(new PropertyValueFactory<>("county"));
+        tblCity.setCellValueFactory(new PropertyValueFactory<>("city"));
+        tblDistrict.setCellValueFactory(new PropertyValueFactory<>("district"));
+        tblStreet.setCellValueFactory(new PropertyValueFactory<>("street"));
+        tblHouseNumber.setCellValueFactory(new PropertyValueFactory<>("houseNumber"));
+        tblPostalCode.setCellValueFactory(new PropertyValueFactory<>("postalCode"));
+        
+        directions = client.findDirectionsByRoute(route.getId().toString());
+        ObservableList<Direction> directionList = FXCollections.observableArrayList(directions);
+        
+        directionsInfo.setItems(directionList);
+        
         routeName.setText(route.getName());
         assignedTo.setText(route.getAssignedTo().getFullName());
         totalDistance.setText(route.getTotalDistance().toString());
@@ -146,6 +264,8 @@ public class RouteInfoController {
         trafficMode.setValue(route.getTrafficMode());
         
         
+        
+        
     }
     
     public void handleWindowClosing(WindowEvent e){
@@ -154,6 +274,10 @@ public class RouteInfoController {
     
     public void setRoute(Route route){
         this.route=route;
+    }
+    
+    public Route getRoute(){
+        return this.route;
     }
     /**
      * Setter for the stage
@@ -168,6 +292,14 @@ public class RouteInfoController {
      */
     public Stage getStage(){
         return stage;
+    }
+    
+    public User getUser(){
+        return user;
+    }
+    
+    public void setUser(User user){
+        this.user=user;
     }
     
 }

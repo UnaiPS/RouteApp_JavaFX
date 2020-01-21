@@ -5,6 +5,7 @@
  */
 package client;
 
+import java.util.ArrayList;
 import java.util.List;
 import model.Coordinate;
 import model.Coordinate_Route;
@@ -20,12 +21,14 @@ import model.User;
  * @author Jon Calvo Gaminde
  */
 public interface Client {
+    
+    public void setCode(String code);
 
     //Route Client
 
     public void createRoute(FullRoute fullRoute);
     
-    public void editRoute(FullRoute fullRoute);
+    public void editRoute(Route route);
     
     public Route findRoute(String routeId);
     
@@ -64,4 +67,10 @@ public interface Client {
     public void forgottenPassword(User userData);
     
     public String emailConfirmation(User user);
+    
+    public Direction getDirection(String direction, Type type) throws LogicBusinessException;
+    
+    public Route getRoute(ArrayList<String> coords, Route route) throws LogicBusinessException;
+    
+    //public int restorePassword(String email, String login) throws LogicBusinessException;
 }

@@ -5,6 +5,10 @@
  */
 package view;
 
+
+import client.Client;
+import client.ClientFactory;
+import client.ClientRoute;
 import encryption.Hasher;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,6 +31,7 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.PasswordField;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextInputDialog;
@@ -40,6 +45,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import javax.ws.rs.core.GenericType;
 import model.Route;
 import model.User;
 
@@ -60,6 +66,8 @@ public class Admin_Main_MenuController {
     
     private ArrayList<Route> routes = new ArrayList<Route>();
     
+    private Client client = ClientFactory.getClient();
+    
     
     @FXML
     private Button btnLogOut;
@@ -76,9 +84,9 @@ public class Admin_Main_MenuController {
     @FXML
     private TableColumn<?, ?> colEstimatedTime;
     @FXML
-    private TableColumn<?, ?> colStarted;
+    private TableColumn<Route, Boolean> colStarted;
     @FXML
-    private TableColumn<?, ?> colEnded;
+    private TableColumn<Route, Boolean> colEnded;
     @FXML
     private TableColumn<?, ?> colMode;
     @FXML
@@ -141,7 +149,24 @@ public class Admin_Main_MenuController {
         submenuHIW.setOnAction(this::handleHowItWorksMenuItem);
         
         colAssignedTo.setCellValueFactory(new PropertyValueFactory<>("assignedTo"));
-        
+        /*colAssignedTo.setCellFactory(tc-> {
+            TableCell<Word, Integer> cell = new TableCell<>();
+            Text text = new Text();
+            cell.setGraphic(text);
+            text.setTextAlignment(TextAlignment.CENTER);
+            text.setStyle("-fx-fill: -fx-text-background-color;");
+            text.setFontSmoothingType(FontSmoothingType.LCD);
+            text.wrappingWidthProperty().bind(column.widthProperty().subtract(5));
+            text.textProperty().bind(Bindings.createStringBinding(() -> {
+                if (cell.isEmpty()) {
+                    return null ;
+                } else {
+                    return cell.getItem().toString();
+                }
+            }, cell.emptyProperty(), cell.itemProperty()));
+            return cell;  
+        });*/
+
         colCreatedBy.setCellValueFactory(new PropertyValueFactory<>("createdBy"));
         colEnded.setCellValueFactory(new PropertyValueFactory<>("ended"));
         colEstimatedTime.setCellValueFactory(new PropertyValueFactory<>("estimatedTime"));
@@ -153,11 +178,15 @@ public class Admin_Main_MenuController {
         colTraffMode.setCellValueFactory(new PropertyValueFactory<>("trafficMode"));
         colTransMode.setCellValueFactory(new PropertyValueFactory<>("transportMode"));
         
+        //client.findAllRoutes(new GenericType<ArrayList<Route>>(){});
+        try{
+            routes.addAll(client.findAllRoutes());
+            ObservableList<Route> routesList = FXCollections.observableArrayList(routes);
+            tblRoute.setItems(routesList);
+        } catch (NullPointerException ex){
+            
+        }
         
-        
-        ObservableList<Route> routesList = FXCollections.observableArrayList(routes);
-        
-        tblRoute.setItems(routesList);
         
         /*
         The window will show a greating to the user that logs in
@@ -173,6 +202,8 @@ public class Admin_Main_MenuController {
     
     public void handleCloseMenuItem(ActionEvent event){
         LOGGER.info("Close Menu Item pressed");
+        logOut();
+        
     }
     
     public void handleAboutMenuItem(ActionEvent event){
@@ -194,8 +225,18 @@ public class Admin_Main_MenuController {
                 alert = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure that you want to delete the route?",ButtonType.YES,ButtonType.NO);
                 Optional<ButtonType> result = alert.showAndWait();
                 if(result.get()==ButtonType.YES){
-                    tblRoute.getItems().remove(tblRoute.getSelectionModel().getSelectedItem());
-                    tblRoute.refresh();
+                    try{
+                        client.removeRoute(tblRoute.getSelectionModel().getSelectedItem().getId().toString());
+                        tblRoute.getItems().remove(tblRoute.getSelectionModel().getSelectedItem());
+                        tblRoute.refresh();
+                    }catch(Exception ex){
+                        alert = new Alert(Alert.AlertType.ERROR, "No route was selected. Please, select one route to edit or see the information about it.");
+                        alert.setTitle("No route selected");
+                        alert.showAndWait();
+                        LOGGER.severe(ex.getLocalizedMessage());
+                    }
+                    
+                    
                 }
             }else{
                 throw new Exception();
@@ -225,10 +266,12 @@ public class Admin_Main_MenuController {
             RouteInfoController viewController = loader.getController();
             viewController.setRoute(route);
             Stage stage = new Stage();
-            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.initModality(Modality.NONE);
             viewController.setRoute(selectedRoute);
+            viewController.setUser(user);
             viewController.setStage(stage);
             viewController.initStage(root);
+            this.stage.close();
         } catch (Exception ex) {
             alert = new Alert(Alert.AlertType.ERROR, "No route was selected. Please, select one route to edit or see the information about it.");
             alert.setTitle("No route selected");
@@ -241,10 +284,33 @@ public class Admin_Main_MenuController {
     
     public void handleBtnCreateRoute(ActionEvent e){
         LOGGER.info("Create Route button pressed, opening new window...");
+        Alert alert;
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("CreateRoute.fxml"));
+            Parent root = null;
+            try {
+                root = (Parent) loader.load();
+            } catch (IOException ex) {
+                LOGGER.severe("Error: "+ex.getLocalizedMessage());
+            }
+            FXMLDocumentCreateRouteController viewController = loader.getController();
+            
+            Stage stage = new Stage();
+            stage.initModality(Modality.NONE);
+            viewController.setUser(user);
+            viewController.setStage(stage);
+            viewController.initStage(root);
+            this.stage.close();
+        } catch (Exception ex) {
+            alert = new Alert(Alert.AlertType.ERROR, "Something went wrong opening Create Route window, please try later or restart the programm");
+            alert.setTitle("Something went wrong");
+            alert.showAndWait();
+            LOGGER.severe(ex.getLocalizedMessage());
+        }
     }
     
-    public void handleBtnProfile(ActionEvent e) {
-        LOGGER.info("Profile button pressed, asking for password...");
+    public void handleBtnProfile(ActionEvent e){
+        LOGGER.info("Profile button pressed, opening new window...");
         TextInputDialog dialog = new TextInputDialog("");
         dialog.setTitle("Password confirmation");
         dialog.setHeaderText("Identity confirmation by password requiered.");
@@ -279,6 +345,7 @@ public class Admin_Main_MenuController {
                     viewController.setUser(user);
                     viewController.setStage(stage);
                     viewController.initStage(root);
+                    this.stage.close();
                 } else {
                     Alert alert = new Alert(Alert.AlertType.ERROR);
                     alert.setTitle("Error");
@@ -297,7 +364,7 @@ public class Admin_Main_MenuController {
     
     public void handleBtnLogOut(ActionEvent e){
         LOGGER.info("Log Out button pressed, returning to the Login window...");
-        stage.close();
+        logOut();
     }
     
     public void handleWindowShowing(WindowEvent e){
@@ -314,7 +381,7 @@ public class Admin_Main_MenuController {
         btnLogOut.setText("_Log Out");
         
         btnRouteInfoEdit.setMnemonicParsing(true);
-        btnRouteInfoEdit.setText("_¨Route Info/Edit");
+        btnRouteInfoEdit.setText("_Route Info/Edit");
         
         submenuAbout.setAccelerator(new KeyCodeCombination(KeyCode.A, KeyCodeCombination.CONTROL_ANY));
         submenuHIW.setAccelerator(new KeyCodeCombination(KeyCode.F1));
@@ -354,6 +421,15 @@ public class Admin_Main_MenuController {
     
     public ArrayList<Route> getRoutes(){
         return routes;
+    }
+    
+    public void logOut(){
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure that you want to log out?",ButtonType.YES,ButtonType.NO);
+        Optional<ButtonType> result = alert.showAndWait();
+        if(result.get()==ButtonType.YES){
+            client.setCode("");
+            stage.close();
+        }
     }
     
 }

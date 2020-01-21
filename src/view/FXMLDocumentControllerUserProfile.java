@@ -108,7 +108,8 @@ public class FXMLDocumentControllerUserProfile{
         txLogin.textProperty().addListener(this::textChanged);
         pfNewPassword.textProperty().addListener(this::textChanged);
         pfRepeatPassword.textProperty().addListener(this::textChanged);
-        
+        txStatus.setText(user.getStatus().toString());
+        txPrivilege.setText(user.getPrivilege().toString());
         txLogin.setText(user.getLogin());
         txFullName.setText(user.getFullName());
         txEmail.setText(user.getEmail());
@@ -190,7 +191,27 @@ public class FXMLDocumentControllerUserProfile{
      * @param e Object of type ActionEvent
      */
     public void handleBtBack(ActionEvent e){
-        stage.close();
+        Alert alert;
+        try{
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("Admin_Main_Menu.fxml"));
+            Parent root = null;
+            try {
+                root = (Parent) loader.load();
+            } catch (IOException ex) {
+                LOGGER.severe("Error: "+ex.getLocalizedMessage());
+            }
+            Admin_Main_MenuController viewController = loader.getController();
+            Stage stage = new Stage();
+            stage.initModality(Modality.NONE);
+            viewController.setUser(user);
+            viewController.setStage(stage);
+            viewController.initStage(root);
+            this.stage.close();
+        }catch(Exception ex){
+            LOGGER.severe("Error: "+ex.getLocalizedMessage());
+            alert = new Alert(Alert.AlertType.ERROR, "Unexpected error happened");
+            alert.showAndWait();
+        }    
     }
     /**
      * This method handles the action of the undo button

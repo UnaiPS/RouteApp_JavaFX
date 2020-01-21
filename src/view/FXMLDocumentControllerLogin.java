@@ -206,7 +206,7 @@ public class FXMLDocumentControllerLogin {
    */
     @FXML
     private void handleRestorePasswordButtonAction(ActionEvent event) {
-        /*try {
+        try {
             Parent root = null;
             FXMLLoader loader = new FXMLLoader(getClass().getResource("RestorePassword.fxml"));
             root = (Parent) loader.load();
@@ -222,7 +222,7 @@ public class FXMLDocumentControllerLogin {
             alert.setContentText("An error has ocurred.");
 
             alert.showAndWait();
-        }*/
+        }
     }
     
     private void showError(String errorText) {

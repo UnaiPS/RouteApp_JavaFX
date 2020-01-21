@@ -38,9 +38,9 @@ public class ClientUser {
         webTarget = client.target(BASE_URI).path("routeappjpa.user");
     }
 
-    public void forgottenpasswd(String login, String email) throws ClientErrorException {
+    public void forgottenpasswd(String email, String login) throws ClientErrorException {
         WebTarget resource = webTarget;
-        resource = resource.path(java.text.MessageFormat.format("forgottenpasswd/{0}/{1}", new Object[]{login,email}));
+        resource = resource.path(java.text.MessageFormat.format("forgottenpasswd/{0}/{1}", new Object[]{email,login}));
         resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get();
     }
 
