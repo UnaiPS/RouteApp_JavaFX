@@ -5,9 +5,14 @@
  */
 package client;
 
+import encryption.Hasher;
+import java.security.NoSuchAlgorithmException;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.GenericType;
+import model.Session;
+import model.User;
 
 /**
  * Jersey REST client generated for REST resource:UserFacadeREST
@@ -33,57 +38,65 @@ public class ClientUser {
         webTarget = client.target(BASE_URI).path("routeappjpa.user");
     }
 
-    public <T> T forgottenpasswd(Class<T> responseType, String email) throws ClientErrorException {
+    public void forgottenpasswd(String login, String email) throws ClientErrorException {
         WebTarget resource = webTarget;
-        resource = resource.path(java.text.MessageFormat.format("forgottenpasswd/{0}", new Object[]{email}));
+        resource = resource.path(java.text.MessageFormat.format("forgottenpasswd/{0}/{1}", new Object[]{login,email}));
+        resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get();
+    }
+
+    public <T> T findByPrivilege(String code, GenericType<T> responseType, String privilege) throws ClientErrorException {
+        WebTarget resource = webTarget;
+        resource = resource.path(java.text.MessageFormat.format("privilege/{0}/{1}", new Object[]{code,privilege}));
         return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
     }
 
-    public <T> T findAllDeliveryAccounts(Class<T> responseType) throws ClientErrorException {
+    public void edit(String code, Object requestEntity) throws ClientErrorException {
         WebTarget resource = webTarget;
-        resource = resource.path("deliveryAccounts");
-        return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
+        resource = resource.path(java.text.MessageFormat.format("{0}", new Object[]{code}));
+        resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).put(javax.ws.rs.client.Entity.entity(requestEntity, javax.ws.rs.core.MediaType.APPLICATION_XML));
     }
 
-    public void edit(Object requestEntity, String id) throws ClientErrorException {
-        webTarget.path(java.text.MessageFormat.format("{0}", new Object[]{id})).request(javax.ws.rs.core.MediaType.APPLICATION_XML).put(javax.ws.rs.client.Entity.entity(requestEntity, javax.ws.rs.core.MediaType.APPLICATION_XML));
-    }
-
-    public <T> T find(Class<T> responseType, String id, String fullName) throws ClientErrorException {
+    public <T> T find(String code, Class<T> responseType, String id) throws ClientErrorException {
         WebTarget resource = webTarget;
-        resource = resource.path(java.text.MessageFormat.format("{0}/{1}", new Object[]{id, fullName}));
+        resource = resource.path(java.text.MessageFormat.format("{0}/{1}", new Object[]{code, id}));
         return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
     }
 
     public void create(Object requestEntity) throws ClientErrorException {
         webTarget.request(javax.ws.rs.core.MediaType.APPLICATION_XML).post(javax.ws.rs.client.Entity.entity(requestEntity, javax.ws.rs.core.MediaType.APPLICATION_XML));
     }
-
+/*
     public <T> T editPasswd(Class<T> responseType) throws ClientErrorException {
         return webTarget.path("editPasswd").request().put(null, responseType);
     }
-
+*/
     public <T> T login(Object requestEntity, Class<T> responseType) throws ClientErrorException {
         return webTarget.path("login").request(javax.ws.rs.core.MediaType.APPLICATION_XML).post(javax.ws.rs.client.Entity.entity(requestEntity, javax.ws.rs.core.MediaType.APPLICATION_XML), responseType);
     }
 
-    public <T> T findAll(Class<T> responseType) throws ClientErrorException {
+    public <T> T findAll(String code, GenericType<T> responseType) throws ClientErrorException {
         WebTarget resource = webTarget;
+        resource = resource.path(java.text.MessageFormat.format("{0}", new Object[]{code}));
         return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
     }
 
-    public void remove(String id) throws ClientErrorException {
-        webTarget.path(java.text.MessageFormat.format("{0}", new Object[]{id})).request().delete();
+    public void remove(String code, String id) throws ClientErrorException {
+        webTarget.path(java.text.MessageFormat.format("{0}/{1}", new Object[]{code,id})).request().delete();
     }
 
-    public <T> T findAccountByLogin(Class<T> responseType, String login) throws ClientErrorException {
+    public <T> T findAccountByLogin(String code, Class<T> responseType, String login) throws ClientErrorException {
         WebTarget resource = webTarget;
-        resource = resource.path(java.text.MessageFormat.format("login/{0}", new Object[]{login}));
+        resource = resource.path(java.text.MessageFormat.format("login/{0}/{1}", new Object[]{code, login}));
         return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
     }
 
+    
+    public <T> T emailConfirmation(String code, Object requestEntity,  Class<T> responseType) {
+        return webTarget.path(java.text.MessageFormat.format("email/{0}", new Object[]{code})).request(javax.ws.rs.core.MediaType.APPLICATION_XML).post(javax.ws.rs.client.Entity.entity(requestEntity, javax.ws.rs.core.MediaType.APPLICATION_XML), responseType);
+         
+    }
+    
     public void close() {
         client.close();
     }
-    
 }

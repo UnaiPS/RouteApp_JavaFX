@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<AnchorPane fx:id="signUpPane" id="signUpPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="428.0" prefWidth="634.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.FXMLDocumentControllerSignUp">
+   <children>
+      <Text id="txtName" layoutX="86.0" layoutY="83.0" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-opacity: 87%;" text="Full name:">
+         <font>
+            <Font size="18.0" />
+         </font>
+      </Text>
+      <Text id="txtEmail" layoutX="87.0" layoutY="132.0" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-opacity: 87%;" text="E-mail:">
+         <font>
+            <Font size="18.0" />
+         </font>
+      </Text>
+      <Text id="txtLogin" layoutX="87.0" layoutY="186.0" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-opacity: 87%;" text="Login:">
+         <font>
+            <Font size="18.0" />
+         </font>
+      </Text>
+      <Text id="txtPassword" layoutX="87.0" layoutY="241.0" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-opacity: 87%;" text="Password:">
+         <font>
+            <Font size="18.0" />
+         </font>
+      </Text>
+      <Text id="txtPassword" layoutX="85.0" layoutY="285.0" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-opacity: 87%;" text="Confirm your password:" wrappingWidth="116.80000364780426">
+         <font>
+            <Font size="18.0" />
+         </font>
+      </Text>
+      <TextField id="tfFullName" fx:id="tfFullName" layoutX="210.0" layoutY="61.0" prefHeight="26.0" prefWidth="296.0">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </TextField>
+      <TextField id="tfEmail" fx:id="tfEmail" layoutX="210.0" layoutY="113.0" prefHeight="30.0" prefWidth="296.0">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </TextField>
+      <TextField id="tfLogin" fx:id="tfLogin" layoutX="210.0" layoutY="167.0" prefHeight="30.0" prefWidth="296.0">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </TextField>
+      <PasswordField id="pfPassword" fx:id="pfPassword" layoutX="210.0" layoutY="221.0" prefHeight="30.0" prefWidth="296.0" />
+      <PasswordField id="pfConfirm" fx:id="pfConfirm" layoutX="210.0" layoutY="275.0" prefHeight="30.0" prefWidth="296.0" />
+      <Button id="btnCancel" fx:id="btnCancel" layoutX="55.0" layoutY="346.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="100.0" text="Cancel">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </Button>
+      <Button id="btnUndo" fx:id="btnUndo" layoutX="226.0" layoutY="346.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="100.0" text="Undo">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </Button>
+      <Button id="btnRedo" fx:id="btnRedo" layoutX="334.0" layoutY="346.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="100.0" text="Redo">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </Button>
+      <Button id="btnRegister" fx:id="btnRegister" layoutX="507.0" layoutY="346.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="100.0" text="Register">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </Button>
+   </children>
+</AnchorPane>
