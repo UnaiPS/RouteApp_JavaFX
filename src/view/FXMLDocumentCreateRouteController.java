@@ -42,7 +42,21 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import client.LogicBusinessException;
 import java.io.IOException;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.DatePicker;
+import javafx.scene.control.MenuItem;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.stage.Modality;
 import model.Privilege;
 
@@ -58,6 +72,7 @@ public class FXMLDocumentCreateRouteController {
     private User user;
     private ArrayList<Direction> directionsJIC;
     private Direction originJIC;
+    private LocalDate deadline;
     
     private ObservableList directions;
     
@@ -65,7 +80,8 @@ public class FXMLDocumentCreateRouteController {
     
     final ToggleGroup groupTransport = new ToggleGroup();
     
-    
+    @FXML
+    private DatePicker dpDeadLine = new DatePicker();
     @FXML
     private Button btnReturnToMenu;
     @FXML
@@ -122,6 +138,101 @@ public class FXMLDocumentCreateRouteController {
         stage.setScene(scene);
         stage.show();
         
+        ActionEvent event = null;
+        //shortcut for saving the route pressing ctr+S
+        btnSaveRoute.getScene().getAccelerators().put(
+        new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN), 
+        new Runnable() {
+          @Override public void run() {
+              handleSaveButtonAction(event);
+          }
+        }
+      );
+        
+        //Creation of the context menu
+        ContextMenu cm = new ContextMenu();
+        MenuItem delete = new MenuItem("Delete");
+        cm.getItems().add(delete);
+        
+        //Shows the context menu when clicking the table with the right mouse button
+        tvDestinations.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+
+            @Override
+            public void handle(MouseEvent t) {
+                if(t.getButton() == MouseButton.SECONDARY) cm.show(tvDestinations, t.getScreenX(), t.getScreenY());
+            }
+        });
+        //deletes a table entry when clicking on the "Delete" menu item on a table row.
+        delete.setOnAction(new EventHandler<ActionEvent>() {  
+                @Override  
+                public void handle(ActionEvent event) {  
+                    handleDeleteButtonAction(event);
+                }  
+            });  
+        btnCheckOrigin.setOnKeyPressed(new EventHandler<KeyEvent>()
+        {
+            @Override
+            public void handle(KeyEvent ke)
+            {
+                if (ke.getCode().equals(KeyCode.ENTER)) handleOriginButtonAction(event);
+            }
+        });
+        tfOrigin.setOnKeyPressed(new EventHandler<KeyEvent>()
+        {
+            @Override
+            public void handle(KeyEvent ke)
+            {
+                if (ke.getCode().equals(KeyCode.ENTER)) handleOriginButtonAction(event);
+            }
+        });
+        btnCheckDestination.setOnKeyPressed(new EventHandler<KeyEvent>()
+        {
+            @Override
+            public void handle(KeyEvent ke)
+            {
+                if (ke.getCode().equals(KeyCode.ENTER)) handleDestinationButtonAction(event);
+            }
+        });
+        tfDestination.setOnKeyPressed(new EventHandler<KeyEvent>()
+        {
+            @Override
+            public void handle(KeyEvent ke)
+            { 
+                if (ke.getCode().equals(KeyCode.ENTER)) handleDestinationButtonAction(event);
+            }
+        });
+        cbDontAssignYet.setOnKeyPressed(new EventHandler<KeyEvent>()
+        {
+            @Override
+            public void handle(KeyEvent ke)
+            {
+                if (ke.getCode().equals(KeyCode.ENTER))
+                {
+                   if(cbDontAssignYet.isSelected()){
+                    cbDontAssignYet.setSelected(false);
+                    cbAssignTo.setDisable(false);
+
+                }else{
+                    cbAssignTo.setDisable(true);
+                    delivery = null;
+                    cbDontAssignYet.setSelected(true);
+                }
+                }
+            }
+        });
+        cbEnableTrafficMode.setOnKeyPressed(new EventHandler<KeyEvent>()
+        {
+            @Override
+            public void handle(KeyEvent ke)
+            {
+                if (ke.getCode().equals(KeyCode.ENTER))
+                {
+                   if(cbEnableTrafficMode.isSelected()){
+                    cbEnableTrafficMode.setSelected(false);
+                }else cbEnableTrafficMode.setSelected(true);
+                }
+            }
+        });
     }
     
     /**
@@ -129,6 +240,7 @@ public class FXMLDocumentCreateRouteController {
      * button delete is clicked on.
      * @param event 
      */
+    @FXML
     private void handleDeleteButtonAction(ActionEvent event){
         int ind = tvDestinations.getSelectionModel().getSelectedIndex();
         directionsJIC.remove(ind);
@@ -143,6 +255,7 @@ public class FXMLDocumentCreateRouteController {
      * the data will be loaded on the disabled "Origin" textfield. 
      * @param event 
      */
+    @FXML
     private void handleOriginButtonAction(ActionEvent event){
         try {
             Direction e = this.cliente.getDirection(tfOrigin.getText());
@@ -151,9 +264,7 @@ public class FXMLDocumentCreateRouteController {
             alert.setHeaderText("Is this the direction you want?: " + e.getName());
             
             Optional<ButtonType> okButton = alert.showAndWait();
-            if (okButton.isPresent() && okButton.get() == ButtonType.CANCEL) {
-                //nada
-            }else{
+            if (okButton.get() == ButtonType.YES) {
                 tfOriginInfo.setText(e.getName());
                 originJIC = e;
             }
@@ -164,6 +275,7 @@ public class FXMLDocumentCreateRouteController {
                     ButtonType.OK);
             alert.showAndWait();
         }catch(IndexOutOfBoundsException ex){
+            LOGGER.severe("Error: "+ex.getLocalizedMessage());
             Alert alert=new Alert(Alert.AlertType.ERROR,
                     "We couldn't find any direction with the entered data.",
                     ButtonType.OK);
@@ -177,6 +289,7 @@ public class FXMLDocumentCreateRouteController {
      * the data will be loaded on the destinations table.
      * @param event 
      */
+    @FXML
     private void handleDestinationButtonAction(ActionEvent event){
         Direction e = new Direction();
         try {
@@ -189,6 +302,7 @@ public class FXMLDocumentCreateRouteController {
             alert.showAndWait();
             return;
         }catch(IndexOutOfBoundsException ex){
+            LOGGER.severe("Error: "+ex.getLocalizedMessage());
             Alert alert=new Alert(Alert.AlertType.ERROR,
                             "We couldn't find any direction with the entered data.",
                             ButtonType.OK);
@@ -201,11 +315,9 @@ public class FXMLDocumentCreateRouteController {
         alert.setHeaderText("Is this the direction you want?: " + e.getName());
         
         Optional<ButtonType> okButton = alert.showAndWait();
-        if (okButton.isPresent() && okButton.get() == ButtonType.CANCEL) {    
-            //nada
-        }else{
-           tvDestinations.getItems().add(new DirectionTvBean(e.getName()));
-           directionsJIC.add(e);
+        if (okButton.get() == ButtonType.YES) {    
+            tvDestinations.getItems().add(new DirectionTvBean(e.getName()));
+            directionsJIC.add(e);
         }
         tvDestinations.refresh();
     }
@@ -226,12 +338,6 @@ public class FXMLDocumentCreateRouteController {
         rdbtnPedestrian.setToggleGroup(groupTransport);
         rdbtnTruck.setToggleGroup(groupTransport);
         directionsJIC = new ArrayList<Direction>();
-        
-        btnCheckDestination.setOnAction(this::handleDestinationButtonAction);
-        btnCheckOrigin.setOnAction(this::handleOriginButtonAction);
-        btnDelete.setOnAction(this::handleDeleteButtonAction);
-        btnReturnToMenu.setOnAction(this::handleReturnToMenuAction);
-        btnSaveRoute.setOnAction(this::handleSaveButtonAction);
         
         cbDontAssignYet.selectedProperty().addListener(new ChangeListener<Boolean>() {
             /**
@@ -270,7 +376,7 @@ public class FXMLDocumentCreateRouteController {
         try {
             cbAssignTo.getItems().addAll(cliente.findUsersByPrivilege(Privilege.USER));
         } catch (Exception ex) {
-            Logger.getLogger(FXMLDocumentCreateRouteController.class.getName()).log(Level.SEVERE, null, ex);
+            LOGGER.severe("Error: "+ex.getLocalizedMessage());
         }
         cbAssignTo.setOnAction((Event ev) -> {
             delivery = 
@@ -284,6 +390,7 @@ public class FXMLDocumentCreateRouteController {
      * to the database to save it for it to be used later on.
      * @param event 
      */
+    @FXML
     private void handleSaveButtonAction(ActionEvent event){
         if(tfName.getText().length()>30){
             Alert alert=new Alert(Alert.AlertType.ERROR,
@@ -334,6 +441,13 @@ public class FXMLDocumentCreateRouteController {
             alert.showAndWait();
             return;
         }
+        //I am actually making this because I had to implement a datepicker but
+        //I'm not doing anything with it bc to implement it I would have to change the
+        //server and at this point no es plan
+        deadline = dpDeadLine.getValue();
+        Instant instant = Instant.from(deadline.atStartOfDay(ZoneId.systemDefault()));
+        Date date = Date.from(instant);
+        
         //Here I set the route's data.
         Route route = new Route();
         route.setCreatedBy(user);
@@ -364,13 +478,13 @@ public class FXMLDocumentCreateRouteController {
             route = cliente.getRoute(coords, route);
             //HERE WE HAVE TO CALL THE SERVER TO SAVE THE ROUTE AND THE DIRECTIONS AND EVERYTHING.
         } catch (LogicBusinessException ex) {
-            Logger.getLogger(FXMLDocumentCreateRouteController.class.getName()).log(Level.SEVERE, null, ex);
+            LOGGER.severe("Error: "+ex.getLocalizedMessage());
         }
         
         Alert alert=new Alert(Alert.AlertType.INFORMATION,
                             "The route has been saved.",
                             ButtonType.OK);
-            alert.showAndWait();
+        alert.showAndWait();
     }
     
     /**
@@ -386,7 +500,7 @@ public class FXMLDocumentCreateRouteController {
             event.consume();
         }
     }  
-    
+    @FXML
     public void handleReturnToMenuAction(ActionEvent action){
         Alert alert;
         try{
