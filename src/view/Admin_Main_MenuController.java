@@ -37,6 +37,8 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.layout.HBox;
@@ -46,7 +48,10 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javax.ws.rs.core.GenericType;
+import model.Coordinate_Route;
+import model.Direction;
 import model.Route;
+import model.Type;
 import model.User;
 
 /**
@@ -98,6 +103,8 @@ public class Admin_Main_MenuController {
     @FXML
     private Button btnDeleteRoute;
     @FXML
+    private Button btnDrawOnMap;
+    @FXML
     private MenuBar menuBar;
     @FXML
     private Menu menuFile;
@@ -143,6 +150,7 @@ public class Admin_Main_MenuController {
         btnCreateRoute.setOnAction(this::handleBtnCreateRoute);
         btnRouteInfoEdit.setOnAction(this::handleBtnRouteInfoEdit);
         btnDeleteRoute.setOnAction(this::handleBtnDeleteRoute);
+        btnDrawOnMap.setOnAction(this::handleBtnDrawOnMap);
         
         submenuAbout.setOnAction(this::handleAboutMenuItem);
         submenuClose.setOnAction(this::handleCloseMenuItem);
@@ -184,7 +192,7 @@ public class Admin_Main_MenuController {
             ObservableList<Route> routesList = FXCollections.observableArrayList(routes);
             tblRoute.setItems(routesList);
         } catch (NullPointerException ex){
-            
+            LOGGER.severe("No routes found.");
         }
         
         
@@ -240,6 +248,44 @@ public class Admin_Main_MenuController {
                 }
             }else{
                 throw new Exception();
+            }
+            
+        }catch(Exception ex){
+            alert = new Alert(Alert.AlertType.ERROR, "No route was selected. Please, select one route to edit or see the information about it.");
+            alert.setTitle("No route selected");
+            alert.showAndWait();
+            LOGGER.severe(ex.getLocalizedMessage());
+        }
+        
+    }
+    
+    public void handleBtnDrawOnMap(ActionEvent e){
+        Alert alert;
+        LOGGER.info("Draw Route button pressed with the Route: ");
+        try{
+            if(!tblRoute.getSelectionModel().getSelectedItem().equals(null)){
+                Route selectedRoute = tblRoute.getSelectionModel().getSelectedItem();
+                String coords = "";
+                for (Coordinate_Route coordinate : selectedRoute.getCoordinates()) {
+                    coords += "waypoint" + (coordinate.getOrder()-1) + "=" + coordinate.getCoordinate().getLatitude()+","+coordinate.getCoordinate().getLongitude() + "&";
+                    coords += "poix" + (coordinate.getOrder()-1) + "=" + coordinate.getCoordinate().getLatitude()+","+coordinate.getCoordinate().getLongitude() + ";";
+                    if (coordinate.getCoordinate().getType().equals(Type.ORIGIN)) {
+                        coords += "red;";
+                    } else if (coordinate.getVisited() == null) {
+                        coords += "blue;";
+                    } else {
+                        coords += "green;";
+                    }
+                    coords += "black;14;"+ coordinate.getOrder() +"&";
+                }
+                alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Map");
+                alert.setHeaderText("");
+                Image image = new Image("https://image.maps.api.here.com/mia/1.6/routing?app_id=w4M9GIVbS5uVCLiCyGKV&app_code=JOPGDZHGQJ7FpUVmbfm4KA&e=Q&" + coords + "lc=1652B4&lw=6&t=0&w=800&h=600");
+                ImageView imageView = new ImageView(image);
+                alert.setGraphic(null);
+                alert.getDialogPane().setContent(imageView);
+                alert.showAndWait();
             }
             
         }catch(Exception ex){
@@ -390,6 +436,15 @@ public class Admin_Main_MenuController {
     
     public void handleWindowClosing(WindowEvent e){
         LOGGER.info("The window was attempted to be closed");
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "");
+        alert.setTitle("Close");
+        alert.setHeaderText("Are you sure that you want to close the application?");
+        Optional<ButtonType> okButton = alert.showAndWait();
+        if (okButton.isPresent() && okButton.get() == ButtonType.CANCEL) {    
+            e.consume();
+        } else if (okButton.isPresent() && okButton.get() == ButtonType.OK) {
+            System.exit(0);
+        }
     }
     
     /**

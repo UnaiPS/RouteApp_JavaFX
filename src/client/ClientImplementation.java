@@ -6,6 +6,7 @@
 package client;
 
 import encryption.Encrypt;
+import encryption.Hasher;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -16,13 +17,26 @@ import java.sql.Time;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
+import javafx.scene.Parent;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.TextField;
+import javafx.scene.control.TextInputDialog;
+import javafx.scene.layout.HBox;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.NotAuthorizedException;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.ServiceUnavailableException;
 import javax.ws.rs.core.GenericType;
 import model.Coordinate;
@@ -40,6 +54,7 @@ import model.TransportMode;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import view.FXMLDocumentControllerUserProfile;
 
 /**
  *
@@ -70,6 +85,58 @@ public class ClientImplementation implements Client {
         String fullCode = code + Time.from(Instant.now()).getTime();
         return Encrypt.cifrarTexto(fullCode);
     }
+    
+    private void reLogin() {
+        TextInputDialog dialog = new TextInputDialog("");
+        dialog.setTitle("Re-login requiered");
+        dialog.setHeaderText("Due to inactivity, you must login again.");
+        dialog.setGraphic(null);
+
+        TextField tf = new TextField();
+        tf.setPromptText("Login");
+        PasswordField pf = new PasswordField();
+        pf.setPromptText("Password");
+
+
+        HBox hBox = new HBox();
+        hBox.getChildren().add(tf);
+        hBox.getChildren().add(pf);
+        hBox.setPadding(new Insets(20));
+
+        dialog.setResultConverter(dialogButton -> {
+        if (dialogButton == ButtonType.OK ) {
+            return tf.getText().length() + tf.getText() + pf.getText();
+        } else
+            return null;
+        });
+
+        dialog.getDialogPane().setContent(hBox);
+        Optional<String> loginResult = dialog.showAndWait();
+        if (loginResult.isPresent()){
+            User loginData = new User();
+            int loginLegth = Character.getNumericValue(loginResult.get().charAt(0));
+            loginData.setLogin(loginResult.get().substring(1, loginLegth+1));
+            loginData.setPassword(loginResult.get().substring(loginLegth+1));
+            try {
+                login(loginData);
+            } catch(Exception ex) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setHeaderText(ex.getMessage());
+                alert.showAndWait();
+            }
+        } else {
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "");
+            alert.setTitle("Close");
+            alert.setHeaderText("This will close the aplication. Continue?");
+            Optional<ButtonType> okButton = alert.showAndWait();
+            if (okButton.isPresent() && okButton.get() == ButtonType.OK) {
+                System.exit(0);
+            }
+        }
+        
+        
+    }
 
     //Route ClientImplementation
     @Override
@@ -77,7 +144,8 @@ public class ClientImplementation implements Client {
         try {
             clientRoute.create(getSessionCode(), fullRoute);
         } catch (NotAuthorizedException ex) {
-            //TODO
+            reLogin();
+            createRoute(fullRoute);
         } catch (ForbiddenException ex) {
             //TODO
         } catch (InternalServerErrorException ex) {
@@ -90,10 +158,10 @@ public class ClientImplementation implements Client {
     @Override
     public void editRoute(Route route) {
         try {
-            LOGGER.warning("Client implementation: "+route.toString());
             clientRoute.edit(getSessionCode(), route);
         } catch (NotAuthorizedException ex) {
-            //TODO
+            reLogin();
+            editRoute(route);
         } catch (ForbiddenException ex) {
             //TODO
         } catch (InternalServerErrorException ex) {
@@ -109,7 +177,8 @@ public class ClientImplementation implements Client {
         try {
             result = clientRoute.find(getSessionCode(), Route.class, routeId);
         } catch (NotAuthorizedException ex) {
-            //TODO
+            reLogin();
+            findRoute(routeId);
         } catch (ForbiddenException ex) {
             //TODO
         } catch (InternalServerErrorException ex) {
@@ -124,10 +193,10 @@ public class ClientImplementation implements Client {
     public List<Route> findAllRoutes() {
         List<Route> result = null;
         try {
-            result = clientRoute.findAll(getSessionCode(), new GenericType<List<Route>>() {
-            });
+            result = clientRoute.findAll(getSessionCode(), new GenericType<List<Route>>() {});
         } catch (NotAuthorizedException ex) {
-            //TODO
+            reLogin();
+            result = findAllRoutes();
         } catch (ForbiddenException ex) {
             //TODO
         } catch (InternalServerErrorException ex) {
@@ -142,10 +211,10 @@ public class ClientImplementation implements Client {
     public List<Route> findRoutesByAssignedTo(String userId) {
         List<Route> result = null;
         try {
-            result = clientRoute.findByAssignedTo(getSessionCode(), new GenericType<List<Route>>() {
-            }, userId);
+            result = clientRoute.findByAssignedTo(getSessionCode(), new GenericType<List<Route>>() {}, userId);
         } catch (NotAuthorizedException ex) {
-            //TODO
+            reLogin();
+            findRoutesByAssignedTo(userId);
         } catch (ForbiddenException ex) {
             //TODO
         } catch (InternalServerErrorException ex) {
@@ -161,7 +230,8 @@ public class ClientImplementation implements Client {
         try {
             clientRoute.remove(getSessionCode(), routeId);
         } catch (NotAuthorizedException ex) {
-            //TODO
+            reLogin();
+            removeRoute(routeId);
         } catch (ForbiddenException ex) {
             //TODO
         } catch (InternalServerErrorException ex) {
@@ -172,6 +242,25 @@ public class ClientImplementation implements Client {
     }
 
     //Coordinate ClientImplementation
+    
+    @Override
+    public Coordinate findCoordinate(String coordinateId) {
+        Coordinate result = null;
+        try {
+            result = clientCoordinate.find(getSessionCode(), Coordinate.class, coordinateId);
+        } catch (NotAuthorizedException ex) {
+            reLogin();
+            findCoordinate(coordinateId);
+        } catch (ForbiddenException ex) {
+            //TODO
+        } catch (InternalServerErrorException ex) {
+            //TODO
+        } catch (ServiceUnavailableException ex) {
+            //TODO
+        }
+        return result;
+    }
+    
     @Override
     public List<Direction> findDirectionsByType(Type type) {
         List<Direction> result = null;
@@ -179,7 +268,8 @@ public class ClientImplementation implements Client {
             result = clientCoordinate.findDirectionsByType(getSessionCode(), new GenericType<List<Direction>>() {
             }, type.name());
         } catch (NotAuthorizedException ex) {
-            //TODO
+            reLogin();
+            findDirectionsByType(type);
         } catch (ForbiddenException ex) {
             //TODO
         } catch (InternalServerErrorException ex) {
@@ -197,7 +287,8 @@ public class ClientImplementation implements Client {
             result = clientCoordinate.findDirectionsByRoute(getSessionCode(), new GenericType<List<Direction>>() {
             }, routeId);
         } catch (NotAuthorizedException ex) {
-            //TODO
+            reLogin();
+            findDirectionsByRoute(routeId);
         } catch (ForbiddenException ex) {
             //TODO
         } catch (InternalServerErrorException ex) {
@@ -213,7 +304,8 @@ public class ClientImplementation implements Client {
         try {
             clientCoordinate.markDestinationVisited(getSessionCode(), visitedDestination, String.valueOf(gpsCoordinate.getLatitude()), String.valueOf(gpsCoordinate.getLongitude()));
         } catch (NotAuthorizedException ex) {
-            //TODO
+            reLogin();
+            markDestinationAsVisited(gpsCoordinate, visitedDestination);
         } catch (ForbiddenException ex) {
             //TODO
         } catch (InternalServerErrorException ex) {
@@ -241,7 +333,8 @@ public class ClientImplementation implements Client {
         try {
             clientUser.edit(getSessionCode(), user);
         } catch (NotAuthorizedException ex) {
-            //TODO
+            reLogin();
+            editUser(user);
         } catch (ForbiddenException ex) {
             //TODO
         } catch (InternalServerErrorException ex) {
@@ -257,7 +350,8 @@ public class ClientImplementation implements Client {
         try {
             result = clientUser.find(getSessionCode(), User.class, userId);
         } catch (NotAuthorizedException ex) {
-            //TODO
+            reLogin();
+            findUser(userId);
         } catch (ForbiddenException ex) {
             //TODO
         } catch (InternalServerErrorException ex) {
@@ -275,7 +369,8 @@ public class ClientImplementation implements Client {
             result = clientUser.findAll(getSessionCode(), new GenericType<List<User>>() {
             });
         } catch (NotAuthorizedException ex) {
-            //TODO
+            reLogin();
+            findAllUsers();
         } catch (ForbiddenException ex) {
             //TODO
         } catch (InternalServerErrorException ex) {
@@ -292,7 +387,8 @@ public class ClientImplementation implements Client {
         try {
             result = clientUser.findAccountByLogin(getSessionCode(), User.class, userLogin);
         } catch (NotAuthorizedException ex) {
-            //TODO
+            reLogin();
+            findUserByLogin(userLogin);
         } catch (ForbiddenException ex) {
             //TODO
         } catch (InternalServerErrorException ex) {
@@ -310,7 +406,8 @@ public class ClientImplementation implements Client {
             result = clientUser.findByPrivilege(getSessionCode(), new GenericType<List<User>>() {
             }, privilege.name());
         } catch (NotAuthorizedException ex) {
-            //TODO
+            reLogin();
+            findUsersByPrivilege(privilege);
         } catch (ForbiddenException ex) {
             //TODO
         } catch (InternalServerErrorException ex) {
@@ -326,7 +423,8 @@ public class ClientImplementation implements Client {
         try {
             clientUser.remove(getSessionCode(), userId);
         } catch (NotAuthorizedException ex) {
-            //TODO
+            reLogin();
+            removeUser(userId);
         } catch (ForbiddenException ex) {
             //TODO
         } catch (InternalServerErrorException ex) {
@@ -337,12 +435,16 @@ public class ClientImplementation implements Client {
     }
 
     @Override
-    public User login(User loginData) {
+    public User login(User loginData) throws Exception{
         Session result = null;
         try {
             loginData.setPassword(Encrypt.cifrarTexto(loginData.getPassword()));
             result = clientUser.login(loginData, Session.class);
             setCode(result.getCode());
+        } catch (NotFoundException ex) {
+            throw new Exception("No user exists for login: " + loginData.getLogin());
+        } catch (NotAuthorizedException ex) {
+            throw new Exception("The entered password is wrong.");
         } catch (InternalServerErrorException ex) {
             //TODO
         } catch (ServiceUnavailableException ex) {
@@ -368,7 +470,8 @@ public class ClientImplementation implements Client {
         try {
             result = clientUser.emailConfirmation(getSessionCode(), user, String.class);
         } catch (NotAuthorizedException ex) {
-            //TODO
+            reLogin();
+            emailConfirmation(user);
         } catch (ForbiddenException ex) {
             //TODO
         } catch (InternalServerErrorException ex) {
@@ -388,6 +491,7 @@ public class ClientImplementation implements Client {
             String inline = "";
 
             sitio = sitio.replace(" ", "%20");
+            sitio = sitio.replace("ñ", "n");
             URL url = new URL("https://geocoder.api.here.com/6.2/geocode.json?searchtext=" + sitio + "&app_id=w4M9GIVbS5uVCLiCyGKV&app_code=JOPGDZHGQJ7FpUVmbfm4KA" + "&language=en-en");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
@@ -407,7 +511,6 @@ public class ClientImplementation implements Client {
                 JSONParser parse = new JSONParser();
                 JSONObject response = (JSONObject) parse.parse(inline);
                 JSONObject jsonarr_1 = (JSONObject) response.get("Response");
-                //JSONObject jsonarr_2 = (JSONObject) jsonarr_1.get("MetaInfo");
                 JSONArray arrayView = (JSONArray) jsonarr_1.get("View");
                 JSONObject prim = (JSONObject) arrayView.get(0);
                 JSONArray arrayResponse = (JSONArray) prim.get("Result");
@@ -428,8 +531,14 @@ public class ClientImplementation implements Client {
                 direction.setCounty((String) objAddress.get("County"));
                 direction.setName((String) objAddress.get("Label"));
                 String cp = (String) objAddress.get("PostalCode");
-                int CP = Integer.parseInt(cp);
-                direction.setPostalCode(CP);
+                int postalCode = 0;
+                try {
+                    postalCode = Integer.parseInt(cp);
+                } catch (NumberFormatException ex){
+                    postalCode = 0;
+                    LOGGER.warning("Foreign postal code.");
+                }
+                direction.setPostalCode(postalCode);
                 direction.setState((String) objAddress.get("State"));
                 direction.setStreet((String) objAddress.get("Street"));
                 direction.setCity((String) objAddress.get("City"));
@@ -475,17 +584,17 @@ public class ClientImplementation implements Client {
         if (route.getTransportMode() == TransportMode.CAR) {
             mode += ";car";
         } else if (route.getTransportMode() == TransportMode.CAR_HOV) {
-            mode += ";car_hov";
+            mode += ";carHOV";
         } else if (route.getTransportMode() == TransportMode.PEDESTRIAN) {
             mode += ";pedestrian";
         } else if (route.getTransportMode() == TransportMode.TRUCK) {
             mode += ";truck";
         }
 
-        if (route.getTrafficMode() == TrafficMode.DISABLED) {
+        if (route.getTransportMode() != TransportMode.PEDESTRIAN && route.getTrafficMode() == TrafficMode.DISABLED) {
             mode += ";traffic:disabled";
         } else {
-            mode += ";traffic:disabled";
+            mode += ";traffic:enabled";
         }
 
         for (int i = 0; i < coords.size(); i++) {
@@ -518,13 +627,18 @@ public class ClientImplementation implements Client {
                 JSONObject prim = (JSONObject) arrayView.get(0);
                 JSONObject objSummary = (JSONObject) prim.get("summary");
                 String distance = (String) objSummary.get("distance").toString();
-                String trafficTime = (String) objSummary.get("trafficTime").toString();
+                String trafficTime = "0";
+                if (route.getTransportMode() != TransportMode.PEDESTRIAN) {
+                    trafficTime = (String) objSummary.get("trafficTime").toString();
+                } 
                 String baseTime = (String) objSummary.get("baseTime").toString();
 
                 int time = Integer.parseInt(baseTime) + Integer.parseInt(trafficTime);
                 Double distance2 = Double.parseDouble(distance);
                 route.setEstimatedTime(time);
                 route.setTotalDistance(distance2);
+                
+                
             }
         } catch (MalformedURLException ex) {
             Logger.getLogger(ClientImplementation.class.getName()).log(Level.SEVERE, null, ex);
@@ -534,6 +648,79 @@ public class ClientImplementation implements Client {
             Logger.getLogger(ClientImplementation.class.getName()).log(Level.SEVERE, null, ex);
         }
         return route;
+    }
+    
+    @Override
+    public int[][] getMatrix(ArrayList<String> coords, Mode mode, TransportMode transport) throws LogicBusinessException {
+        String extra;
+        String query = "";
+        int[][] matrix = new int[coords.size()][coords.size()];
+
+        if (mode == Mode.FASTEST) {
+            extra = "fastest";
+        } else if (mode == Mode.BALANCED) {
+            extra = "balanced";
+        } else {
+            extra = "shortest";
+        }
+
+        if (transport == TransportMode.CAR) {
+            extra += ";car";
+        } else if (transport == TransportMode.CAR_HOV) {
+            extra += ";carHOV";
+        } else if (transport == TransportMode.PEDESTRIAN) {
+            extra += ";pedestrian";
+        } else if (transport == TransportMode.TRUCK) {
+            extra += ";truck";
+        }
+
+        for (int i = 0; i < coords.size(); i++) {
+            query += "start" + i + "=" + coords.get(i) + "&";
+        }
+        for (int i = 0; i < coords.size(); i++) {
+            query += "destination" + i + "=" + coords.get(i) + "&";
+        }
+        query += "mode=" + extra + "&";
+
+        try {
+            String inline = "";
+            URL url = new URL("https://matrix.route.api.here.com/routing/7.2/calculatematrix.json?" + query + "app_id=w4M9GIVbS5uVCLiCyGKV&app_code=JOPGDZHGQJ7FpUVmbfm4KA");
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.connect();
+            int responsecode = conn.getResponseCode();
+            if (responsecode != 200) {
+                throw new RuntimeException("HttpResponseCode: " + responsecode);
+            } else {
+                Scanner sc = new Scanner(url.openStream());
+                while (sc.hasNext()) {
+                    inline += sc.nextLine();
+                }
+                System.out.println("\nJSON data in string format");
+                System.out.println(inline);
+                sc.close();
+
+                JSONParser parse = new JSONParser();
+                JSONObject response = (JSONObject) parse.parse(inline);
+                JSONObject jsonarr_1 = (JSONObject) response.get("response");
+                JSONArray arrayView = (JSONArray) jsonarr_1.get("matrixEntry");
+                for (int i = 0; i < arrayView.size(); i++) {
+                    JSONObject entry = (JSONObject) arrayView.get(i);
+                    String n = (String) entry.get("startIndex").toString();
+                    String m = (String) entry.get("destinationIndex").toString();
+                    String cost = (String) ((JSONObject) entry.get("summary")).get("costFactor").toString();
+                    matrix[Integer.parseInt(n)][Integer.parseInt(m)] = Integer.parseInt(cost);
+                }
+
+            }
+        } catch (MalformedURLException ex) {
+            Logger.getLogger(ClientImplementation.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ProtocolException | org.json.simple.parser.ParseException ex) {
+            Logger.getLogger(ClientImplementation.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(ClientImplementation.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return matrix;
     }
 
 //    @Override
@@ -551,4 +738,6 @@ public class ClientImplementation implements Client {
 //        }
 //
 //    }
+
+    
 }

@@ -123,12 +123,14 @@ public class FXMLDocumentControllerUserProfile{
      * @param e Object of type WindowEvent
      */
     public void handleWindowClosing(WindowEvent e){
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "");
         alert.setTitle("Close");
-        alert.setHeaderText("Are you sure you want to cancel the modifications?");
+        alert.setHeaderText("Are you sure that you want to close the application?");
         Optional<ButtonType> okButton = alert.showAndWait();
         if (okButton.isPresent() && okButton.get() == ButtonType.CANCEL) {    
             e.consume();
+        } else if (okButton.isPresent() && okButton.get() == ButtonType.OK) {
+            System.exit(0);
         }
     }
     /**
@@ -323,7 +325,7 @@ public class FXMLDocumentControllerUserProfile{
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Error");
         alert.setHeaderText(errorText);
-        alert.show();
+        alert.showAndWait();
     }
 
     public User getUser() {

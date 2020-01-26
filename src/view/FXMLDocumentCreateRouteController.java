@@ -60,6 +60,9 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Modality;
+import logic.Algorithm;
+import logic.CoordinateSorter;
+import model.Coordinate_Route;
 import model.FullRoute;
 import model.Privilege;
 import model.Type;
@@ -482,11 +485,35 @@ public class FXMLDocumentCreateRouteController {
         
         
         try {
+            String shortest = "01";
+            if (coords.size() > 2) {
+                shortest = Algorithm.getShortestRoute(cliente.getMatrix(coords, route.getMode(), route.getTransportMode()));
+                coords = CoordinateSorter.sortByPattern(coords, shortest);
+            }
+                
+            
             route = cliente.getRoute(coords, route);
             //HERE WE HAVE TO CALL THE SERVER TO SAVE THE ROUTE AND THE DIRECTIONS AND EVERYTHING.
+            
+            
             Set<Direction> directions = Sets.newHashSet();
             directions.add(originJIC);
             directions.addAll(directionsJIC);
+            route.setCoordinates(Sets.newHashSet());
+            
+            for (int i = 0; i < shortest.length(); i++) {
+                Direction direction;
+                if (i == 0){
+                    direction = originJIC;
+                } else {
+                    direction = directionsJIC.get(i-1);
+                }
+                Coordinate_Route coorRout = new Coordinate_Route();
+                coorRout.setCoordinate(direction.getCoordinate());
+                coorRout.setOrder(Character.getNumericValue(shortest.charAt(i))+1);
+                route.getCoordinates().add(coorRout);
+            }
+            
             FullRoute fullRoute = new FullRoute();
             fullRoute.setRoute(route);
             fullRoute.setDirections(directions);

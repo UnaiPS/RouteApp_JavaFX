@@ -35,9 +35,14 @@ import model.User;
 import client.UserRESTClient;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javax.ws.rs.NotAuthorizedException;
 import model.Coordinate;
 import model.Direction;
 import model.FullRoute;
@@ -87,6 +92,8 @@ public class RouteInfoController {
     @FXML
     private ComboBox<TrafficMode> trafficMode;
     @FXML
+    private Button btnSeeOnMap;
+    @FXML
     private Button btnUpdateAssingRoute;
     @FXML
     private Button btnSaveChanges;
@@ -131,6 +138,7 @@ public class RouteInfoController {
         stage.setOnCloseRequest(this::handleWindowClosing);
         
         btnReturnToMainMenu.setOnAction(this::handlebtnReturnToMainMenu);
+        btnSeeOnMap.setOnAction(this::handleBtnSeeOnMap);
         btnUpdateAssingRoute.setOnAction(this::handlebtnUpdateAssignRoute);
         btnSaveChanges.setOnAction(this::handlebtnSaveChanges);
         
@@ -153,6 +161,7 @@ public class RouteInfoController {
         mode.setItems(modes);
         transportMode.setItems(transModes);
         trafficMode.setItems(traffModes);
+        directions = client.findDirectionsByRoute(route.getId().toString());
         
         stage.show();
     }
@@ -229,6 +238,10 @@ public class RouteInfoController {
             viewController.setStage(stage);
             viewController.initStage(root);
             this.stage.close();
+        }catch(NotAuthorizedException ex){
+            LOGGER.severe("Re-login requiered.");
+            alert = new Alert(Alert.AlertType.ERROR, ex.getLocalizedMessage());
+            alert.showAndWait();
         }catch(Exception ex){
             LOGGER.severe("Error: "+ex.getLocalizedMessage());
             alert = new Alert(Alert.AlertType.ERROR, "Unexpected error happened");
@@ -237,32 +250,37 @@ public class RouteInfoController {
     }
     
     public void handleWindowShowing(WindowEvent e){
-        tblType.setCellValueFactory(cellData -> new SimpleObjectProperty(cellData.getValue().getCoordinate().getType()));
-        tblCountry.setCellValueFactory(new PropertyValueFactory<>("country"));
-        tblState.setCellValueFactory(new PropertyValueFactory<>("state"));
-        tblCounty.setCellValueFactory(new PropertyValueFactory<>("county"));
-        tblCity.setCellValueFactory(new PropertyValueFactory<>("city"));
-        tblDistrict.setCellValueFactory(new PropertyValueFactory<>("district"));
-        tblStreet.setCellValueFactory(new PropertyValueFactory<>("street"));
-        tblHouseNumber.setCellValueFactory(new PropertyValueFactory<>("houseNumber"));
-        tblPostalCode.setCellValueFactory(new PropertyValueFactory<>("postalCode"));
-        
-        directions = client.findDirectionsByRoute(route.getId().toString());
-        ObservableList<Direction> directionList = FXCollections.observableArrayList(directions);
-        
-        directionsInfo.setItems(directionList);
-        
-        routeName.setText(route.getName());
-        assignedTo.setText(route.getAssignedTo().getFullName());
-        totalDistance.setText(route.getTotalDistance().toString());
-        estimatedTime.setText(route.getEstimatedTime().toString());
-        createdBy.setText(route.getCreatedBy().getFullName());
-        isEnded.setSelected(route.getEnded());
-        isStarted.setSelected(route.getStarted());
-        mode.setValue(route.getMode());
-        transportMode.setValue(route.getTransportMode());
-        trafficMode.setValue(route.getTrafficMode());
-        
+        try{
+            tblType.setCellValueFactory(cellData -> new SimpleObjectProperty(cellData.getValue().getCoordinate().getType()));
+            tblCountry.setCellValueFactory(new PropertyValueFactory<>("country"));
+            tblState.setCellValueFactory(new PropertyValueFactory<>("state"));
+            tblCounty.setCellValueFactory(new PropertyValueFactory<>("county"));
+            tblCity.setCellValueFactory(new PropertyValueFactory<>("city"));
+            tblDistrict.setCellValueFactory(new PropertyValueFactory<>("district"));
+            tblStreet.setCellValueFactory(new PropertyValueFactory<>("street"));
+            tblHouseNumber.setCellValueFactory(new PropertyValueFactory<>("houseNumber"));
+            tblPostalCode.setCellValueFactory(new PropertyValueFactory<>("postalCode"));
+
+            
+            ObservableList<Direction> directionList = FXCollections.observableArrayList(directions);
+
+            directionsInfo.setItems(directionList);
+
+            routeName.setText(route.getName());
+            if (route.getAssignedTo() != null) {
+                assignedTo.setText(route.getAssignedTo().getFullName());
+            }
+            totalDistance.setText(route.getTotalDistance().toString());
+            estimatedTime.setText(route.getEstimatedTime().toString());
+            createdBy.setText(route.getCreatedBy().getFullName());
+            isEnded.setSelected(route.getEnded());
+            isStarted.setSelected(route.getStarted());
+            mode.setValue(route.getMode());
+            transportMode.setValue(route.getTransportMode());
+            trafficMode.setValue(route.getTrafficMode());
+        } catch(Exception ex) {
+            LOGGER.severe(ex.getLocalizedMessage());
+        }
         
         
         
@@ -270,6 +288,49 @@ public class RouteInfoController {
     
     public void handleWindowClosing(WindowEvent e){
         LOGGER.info("The window was attempted to be closed");
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "");
+        alert.setTitle("Close");
+        alert.setHeaderText("Are you sure that you want to close the application?");
+        Optional<ButtonType> okButton = alert.showAndWait();
+        if (okButton.isPresent() && okButton.get() == ButtonType.CANCEL) {    
+            e.consume();
+        } else if (okButton.isPresent() && okButton.get() == ButtonType.OK) {
+            System.exit(0);
+        }
+    }
+    
+    public void handleBtnSeeOnMap(ActionEvent e){
+        LOGGER.info("See on Map button pressed.");
+        Alert alert;
+        try {
+            Direction selectedDirection = ((Direction)directionsInfo.getSelectionModel().getSelectedItem());
+            String coords = "poix0=" + selectedDirection.getCoordinate().getLatitude()+ ","
+                    + selectedDirection.getCoordinate().getLongitude() + ";blue;blue;12;%20&";
+            Coordinate_Route coordRoute = route.getCoordinates().stream().filter(coor -> coor.getCoordinate().equals(selectedDirection.getCoordinate())).collect(Collectors.toList()).get(0);
+            if (coordRoute.getVisited() != null) {
+                LOGGER.severe("Visitado");
+                LOGGER.severe(coordRoute.getVisited().toString());
+                Coordinate gps = client.findCoordinate(coordRoute.getVisited().toString());
+                LOGGER.severe(gps.toString());
+                coords += "poix1=" + gps.getLatitude()+ "," + gps.getLongitude() + ";green;green;12;%20&";
+            }
+            
+            alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Map");
+            alert.setHeaderText("");
+            Image image = new Image("https://image.maps.api.here.com/mia/1.6/?app_id=w4M9GIVbS5uVCLiCyGKV&app_code=JOPGDZHGQJ7FpUVmbfm4KA&e=Q&" + coords + "poithm=1&z=17&w=800&h=600");
+            ImageView imageView = new ImageView(image);
+            alert.setGraphic(null);
+            alert.getDialogPane().setContent(imageView);
+            alert.showAndWait();
+        } catch (Exception ex) {
+            alert = new Alert(Alert.AlertType.ERROR, "No direction was selected. Please, select one direction to see it on the map.");
+            alert.setTitle("No direction selected");
+            alert.showAndWait();
+            LOGGER.severe(ex.getLocalizedMessage());
+        }
+        
+        
     }
     
     public void setRoute(Route route){

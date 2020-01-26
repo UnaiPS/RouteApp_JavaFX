@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Text?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1080.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.RouteInfoController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1080.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.RouteInfoController">
    <children>
       <Text layoutX="85.0" layoutY="84.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Name:" />
       <TextField id="routeName" fx:id="routeName" layoutX="157.0" layoutY="67.0" />
@@ -29,6 +29,7 @@
       <ComboBox id="trafficMode" fx:id="trafficMode" layoutX="786.0" layoutY="147.0" prefWidth="150.0" />
       <Text layoutX="678.0" layoutY="164.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Traffic Mode:" />
       <Text layoutX="54.0" layoutY="226.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Waypoints" />
+      <Button id="btnSeeOnMap" fx:id="btnSeeOnMap" layoutX="635.0" layoutY="659.0" mnemonicParsing="false" text="See point on map" />
       <Button id="btnUpdateAssingRoute" fx:id="btnUpdateAssingRoute" layoutX="776.0" layoutY="659.0" mnemonicParsing="false" text="Update or Assign Route" />
       <Button id="btnSaveChanges" fx:id="btnSaveChanges" layoutX="950.0" layoutY="659.0" mnemonicParsing="false" text="Save Changes" />
       <TableView id="directionsInfo" fx:id="directionsInfo" layoutX="50.0" layoutY="213.0" prefHeight="421.0" prefWidth="980.0">

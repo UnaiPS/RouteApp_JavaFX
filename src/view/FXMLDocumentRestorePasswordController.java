@@ -133,6 +133,8 @@ public class FXMLDocumentRestorePasswordController {
         Optional<ButtonType> okButton = alert.showAndWait();
         if (okButton.isPresent() && okButton.get() == ButtonType.CANCEL) {    
             event.consume();
+        } else if (okButton.isPresent() && okButton.get() == ButtonType.OK) {
+            System.exit(0);
         }
     }
 }
