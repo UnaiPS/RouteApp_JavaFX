@@ -264,7 +264,7 @@ public class FXMLDocumentCreateRouteController {
             alert.setHeaderText("Is this the direction you want?: " + e.getName());
             
             Optional<ButtonType> okButton = alert.showAndWait();
-            if (okButton.get() == ButtonType.YES) {
+            if (okButton.get() == ButtonType.OK) {
                 tfOriginInfo.setText(e.getName());
                 originJIC = e;
             }
@@ -315,7 +315,7 @@ public class FXMLDocumentCreateRouteController {
         alert.setHeaderText("Is this the direction you want?: " + e.getName());
         
         Optional<ButtonType> okButton = alert.showAndWait();
-        if (okButton.get() == ButtonType.YES) {    
+        if (okButton.get() == ButtonType.OK) {    
             tvDestinations.getItems().add(new DirectionTvBean(e.getName()));
             directionsJIC.add(e);
         }
