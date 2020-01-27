@@ -276,7 +276,7 @@ public class Admin_Main_MenuController {
                     } else {
                         coords += "green;";
                     }
-                    coords += "black;14;"+ coordinate.getOrder() +"&";
+                    coords += "white;14;"+ coordinate.getOrder() +"&";
                 }
                 alert = new Alert(Alert.AlertType.INFORMATION);
                 alert.setTitle("Map");
