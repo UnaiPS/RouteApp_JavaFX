@@ -27,11 +27,10 @@ public class ClientCoordinate {
 
     private WebTarget webTarget;
     private Client client;
-    private static final String BASE_URI = "http://localhost:8080/RouteApp_Server/webresources";
 
-    public ClientCoordinate() {
+    public ClientCoordinate(String baseURI) {
         client = javax.ws.rs.client.ClientBuilder.newClient();
-        webTarget = client.target(BASE_URI).path("routeappjpa.coordinate");
+        webTarget = client.target(baseURI).path("routeappjpa.coordinate");
     }
 
     public <T> T find(String code, Class<T> responseType, String id) throws ClientErrorException {

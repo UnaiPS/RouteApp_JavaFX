@@ -24,53 +24,53 @@ import model.User;
  */
 public interface Client {
     
-    public void setCode(String code);
+    public void setCode(String code );
 
     //Route Client
 
-    public void createRoute(FullRoute fullRoute);
+    public void createRoute(FullRoute fullRoute ) throws Exception;
     
-    public void editRoute(Route route);
+    public void editRoute(Route route ) throws Exception;
     
-    public Route findRoute(String routeId);
+    public Route findRoute(String routeId ) throws Exception;
     
-    public List<Route> findAllRoutes();
+    public List<Route> findAllRoutes( ) throws Exception;
     
-    public List<Route> findRoutesByAssignedTo(String userId);
+    public List<Route> findRoutesByAssignedTo(String userId ) throws Exception;
     
-    public void removeRoute(String routeId);
+    public void removeRoute(String routeId ) throws Exception;
     
     //Coordinate Client
     
-    public Coordinate findCoordinate(String coordinateId);
+    public Coordinate findCoordinate(String coordinateId ) throws Exception;
     
-    public List<Direction> findDirectionsByType(Type type);
+    public List<Direction> findDirectionsByType(Type type ) throws Exception;
     
-    public List<Direction> findDirectionsByRoute(String routeId);
+    public List<Direction> findDirectionsByRoute(String routeId ) throws Exception;
     
-    public void markDestinationAsVisited(Coordinate gpsCoordinate, Coordinate_Route visitedDestination);
+    public void markDestinationAsVisited(Coordinate gpsCoordinate, Coordinate_Route visitedDestination ) throws Exception;
     
     //User Client
     
-    public void createUser(User user);
+    public void createUser(User user ) throws Exception;
     
-    public void editUser(User user);
+    public void editUser(User user ) throws Exception;
     
-    public User findUser(String userId);
+    public User findUser(String userId ) throws Exception;
     
-    public List<User> findAllUsers();
+    public List<User> findAllUsers( ) throws Exception;
     
-    public User findUserByLogin(String userLogin);
+    public User findUserByLogin(String userLogin ) throws Exception;
     
-    public List<User> findUsersByPrivilege(Privilege privilege);
+    public List<User> findUsersByPrivilege(Privilege privilege ) throws Exception;
     
-    public void removeUser(String userId);
+    public void removeUser(String userId ) throws Exception;
     
     public User login(User loginData) throws Exception;
     
-    public void forgottenPassword(User userData);
+    public void forgottenPassword(User userData ) throws Exception;
     
-    public String emailConfirmation(User user);
+    public String emailConfirmation(User user ) throws Exception;
     
     //Remote API
     

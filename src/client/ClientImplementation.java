@@ -6,33 +6,27 @@
 package client;
 
 import encryption.Encrypt;
-import encryption.Hasher;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
-import java.security.NoSuchAlgorithmException;
 import java.sql.Time;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.ResourceBundle;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
-import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.HBox;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.NotAuthorizedException;
@@ -54,7 +48,6 @@ import model.TransportMode;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import view.FXMLDocumentControllerUserProfile;
 
 /**
  *
@@ -68,7 +61,12 @@ public class ClientImplementation implements Client {
     private ClientRoute clientRoute;
     private ClientCoordinate clientCoordinate;
     private ClientUser clientUser;
-
+    ResourceBundle properties = ResourceBundle.getBundle("clientconfig");
+    private final String HERE_ID = properties.getString("hereApiId");
+    private final String HERE_CODE = properties.getString("hereApiCode");
+    private final String SERVER_IP = properties.getString("serverIp");
+    private final String SERVER_PORT = properties.getString("serverPort");
+    
     @Override
     public void setCode(String code) {
         this.code = code;
@@ -76,9 +74,10 @@ public class ClientImplementation implements Client {
 
     public ClientImplementation() {
         code = "";
-        clientRoute = new ClientRoute();
-        clientCoordinate = new ClientCoordinate();
-        clientUser = new ClientUser();
+        String baseURI = "http://" + SERVER_IP + ":" + SERVER_PORT + "/RouteApp_Server/webresources";
+        clientRoute = new ClientRoute(baseURI);
+        clientCoordinate = new ClientCoordinate(baseURI);
+        clientUser = new ClientUser(baseURI);
     }
 
     public String getSessionCode() {
@@ -140,39 +139,39 @@ public class ClientImplementation implements Client {
 
     //Route ClientImplementation
     @Override
-    public void createRoute(FullRoute fullRoute) {
+    public void createRoute(FullRoute fullRoute) throws Exception {
         try {
             clientRoute.create(getSessionCode(), fullRoute);
         } catch (NotAuthorizedException ex) {
             reLogin();
             createRoute(fullRoute);
         } catch (ForbiddenException ex) {
-            //TODO
+            throw new Exception("Wrong privilege.");
         } catch (InternalServerErrorException ex) {
-            //TODO
+            throw new Exception("Unexpected error happened.");
         } catch (ServiceUnavailableException ex) {
-            //TODO
+            throw new Exception("Unable to process. Try again later.");
         }
     }
 
     @Override
-    public void editRoute(Route route) {
+    public void editRoute(Route route) throws Exception {
         try {
             clientRoute.edit(getSessionCode(), route);
         } catch (NotAuthorizedException ex) {
             reLogin();
             editRoute(route);
         } catch (ForbiddenException ex) {
-            //TODO
+            throw new Exception("Wrong privilege.");
         } catch (InternalServerErrorException ex) {
-            //TODO
+            throw new Exception("Unexpected error happened.");
         } catch (ServiceUnavailableException ex) {
-            //TODO
+            throw new Exception("Unable to process. Try again later.");
         }
     }
 
     @Override
-    public Route findRoute(String routeId) {
+    public Route findRoute(String routeId) throws Exception {
         Route result = null;
         try {
             result = clientRoute.find(getSessionCode(), Route.class, routeId);
@@ -180,17 +179,17 @@ public class ClientImplementation implements Client {
             reLogin();
             findRoute(routeId);
         } catch (ForbiddenException ex) {
-            //TODO
+            throw new Exception("Wrong privilege.");
         } catch (InternalServerErrorException ex) {
-            //TODO
+            throw new Exception("Unexpected error happened.");
         } catch (ServiceUnavailableException ex) {
-            //TODO
+            throw new Exception("Unable to process. Try again later.");
         }
         return result;
     }
 
     @Override
-    public List<Route> findAllRoutes() {
+    public List<Route> findAllRoutes() throws Exception {
         List<Route> result = null;
         try {
             result = clientRoute.findAll(getSessionCode(), new GenericType<List<Route>>() {});
@@ -198,17 +197,17 @@ public class ClientImplementation implements Client {
             reLogin();
             result = findAllRoutes();
         } catch (ForbiddenException ex) {
-            //TODO
+            throw new Exception("Wrong privilege.");
         } catch (InternalServerErrorException ex) {
-            //TODO
+            throw new Exception("Unexpected error happened.");
         } catch (ServiceUnavailableException ex) {
-            //TODO
+            throw new Exception("Unable to process. Try again later.");
         }
         return result;
     }
 
     @Override
-    public List<Route> findRoutesByAssignedTo(String userId) {
+    public List<Route> findRoutesByAssignedTo(String userId) throws Exception {
         List<Route> result = null;
         try {
             result = clientRoute.findByAssignedTo(getSessionCode(), new GenericType<List<Route>>() {}, userId);
@@ -216,35 +215,35 @@ public class ClientImplementation implements Client {
             reLogin();
             findRoutesByAssignedTo(userId);
         } catch (ForbiddenException ex) {
-            //TODO
+            throw new Exception("Wrong privilege.");
         } catch (InternalServerErrorException ex) {
-            //TODO
+            throw new Exception("Unexpected error happened.");
         } catch (ServiceUnavailableException ex) {
-            //TODO
+            throw new Exception("Unable to process. Try again later.");
         }
         return result;
     }
 
     @Override
-    public void removeRoute(String routeId) {
+    public void removeRoute(String routeId) throws Exception {
         try {
             clientRoute.remove(getSessionCode(), routeId);
         } catch (NotAuthorizedException ex) {
             reLogin();
             removeRoute(routeId);
         } catch (ForbiddenException ex) {
-            //TODO
+            throw new Exception("Wrong privilege.");
         } catch (InternalServerErrorException ex) {
-            //TODO
+            throw new Exception("Unexpected error happened.");
         } catch (ServiceUnavailableException ex) {
-            //TODO
+            throw new Exception("Unable to process. Try again later.");
         }
     }
 
     //Coordinate ClientImplementation
     
     @Override
-    public Coordinate findCoordinate(String coordinateId) {
+    public Coordinate findCoordinate(String coordinateId) throws Exception {
         Coordinate result = null;
         try {
             result = clientCoordinate.find(getSessionCode(), Coordinate.class, coordinateId);
@@ -252,17 +251,17 @@ public class ClientImplementation implements Client {
             reLogin();
             findCoordinate(coordinateId);
         } catch (ForbiddenException ex) {
-            //TODO
+            throw new Exception("Wrong privilege.");
         } catch (InternalServerErrorException ex) {
-            //TODO
+            throw new Exception("Unexpected error happened.");
         } catch (ServiceUnavailableException ex) {
-            //TODO
+            throw new Exception("Unable to process. Try again later.");
         }
         return result;
     }
     
     @Override
-    public List<Direction> findDirectionsByType(Type type) {
+    public List<Direction> findDirectionsByType(Type type) throws Exception {
         List<Direction> result = null;
         try {
             result = clientCoordinate.findDirectionsByType(getSessionCode(), new GenericType<List<Direction>>() {
@@ -271,17 +270,17 @@ public class ClientImplementation implements Client {
             reLogin();
             findDirectionsByType(type);
         } catch (ForbiddenException ex) {
-            //TODO
+            throw new Exception("Wrong privilege.");
         } catch (InternalServerErrorException ex) {
-            //TODO
+            throw new Exception("Unexpected error happened.");
         } catch (ServiceUnavailableException ex) {
-            //TODO
+            throw new Exception("Unable to process. Try again later.");
         }
         return result;
     }
 
     @Override
-    public List<Direction> findDirectionsByRoute(String routeId) {
+    public List<Direction> findDirectionsByRoute(String routeId) throws Exception {
         List<Direction> result = null;
         try {
             result = clientCoordinate.findDirectionsByRoute(getSessionCode(), new GenericType<List<Direction>>() {
@@ -290,62 +289,62 @@ public class ClientImplementation implements Client {
             reLogin();
             findDirectionsByRoute(routeId);
         } catch (ForbiddenException ex) {
-            //TODO
+            throw new Exception("Wrong privilege.");
         } catch (InternalServerErrorException ex) {
-            //TODO
+            throw new Exception("Unexpected error happened.");
         } catch (ServiceUnavailableException ex) {
-            //TODO
+            throw new Exception("Unable to process. Try again later.");
         }
         return result;
     }
 
     @Override
-    public void markDestinationAsVisited(Coordinate gpsCoordinate, Coordinate_Route visitedDestination) {
+    public void markDestinationAsVisited(Coordinate gpsCoordinate, Coordinate_Route visitedDestination) throws Exception {
         try {
             clientCoordinate.markDestinationVisited(getSessionCode(), visitedDestination, String.valueOf(gpsCoordinate.getLatitude()), String.valueOf(gpsCoordinate.getLongitude()));
         } catch (NotAuthorizedException ex) {
             reLogin();
             markDestinationAsVisited(gpsCoordinate, visitedDestination);
         } catch (ForbiddenException ex) {
-            //TODO
+            throw new Exception("Wrong privilege.");
         } catch (InternalServerErrorException ex) {
-            //TODO
+            throw new Exception("Unexpected error happened.");
         } catch (ServiceUnavailableException ex) {
-            //TODO
+            throw new Exception("Unable to process. Try again later.");
         }
     }
 
     //User ClientImplementation
     @Override
-    public void createUser(User user) {
+    public void createUser(User user) throws Exception {
         try {
             user.setPassword(Encrypt.cifrarTexto(user.getPassword()));
             clientUser.create(user);
         } catch (InternalServerErrorException ex) {
-            //TODO
+            throw new Exception("Unexpected error happened.");
         } catch (ServiceUnavailableException ex) {
-            //TODO
+            throw new Exception("Unable to process. Try again later.");
         }
     }
 
     @Override
-    public void editUser(User user) {
+    public void editUser(User user) throws Exception {
         try {
             clientUser.edit(getSessionCode(), user);
         } catch (NotAuthorizedException ex) {
             reLogin();
             editUser(user);
         } catch (ForbiddenException ex) {
-            //TODO
+            throw new Exception("Wrong privilege.");
         } catch (InternalServerErrorException ex) {
-            //TODO
+            throw new Exception("Unexpected error happened.");
         } catch (ServiceUnavailableException ex) {
-            //TODO
+            throw new Exception("Unable to process. Try again later.");
         }
     }
 
     @Override
-    public User findUser(String userId) {
+    public User findUser(String userId) throws Exception {
         User result = null;
         try {
             result = clientUser.find(getSessionCode(), User.class, userId);
@@ -353,17 +352,17 @@ public class ClientImplementation implements Client {
             reLogin();
             findUser(userId);
         } catch (ForbiddenException ex) {
-            //TODO
+            throw new Exception("Wrong privilege.");
         } catch (InternalServerErrorException ex) {
-            //TODO
+            throw new Exception("Unexpected error happened.");
         } catch (ServiceUnavailableException ex) {
-            //TODO
+            throw new Exception("Unable to process. Try again later.");
         }
         return result;
     }
 
     @Override
-    public List<User> findAllUsers() {
+    public List<User> findAllUsers() throws Exception {
         List<User> result = null;
         try {
             result = clientUser.findAll(getSessionCode(), new GenericType<List<User>>() {
@@ -372,17 +371,17 @@ public class ClientImplementation implements Client {
             reLogin();
             findAllUsers();
         } catch (ForbiddenException ex) {
-            //TODO
+            throw new Exception("Wrong privilege.");
         } catch (InternalServerErrorException ex) {
-            //TODO
+            throw new Exception("Unexpected error happened.");
         } catch (ServiceUnavailableException ex) {
-            //TODO
+            throw new Exception("Unable to process. Try again later.");
         }
         return result;
     }
 
     @Override
-    public User findUserByLogin(String userLogin) {
+    public User findUserByLogin(String userLogin) throws Exception {
         User result = null;
         try {
             result = clientUser.findAccountByLogin(getSessionCode(), User.class, userLogin);
@@ -390,17 +389,17 @@ public class ClientImplementation implements Client {
             reLogin();
             findUserByLogin(userLogin);
         } catch (ForbiddenException ex) {
-            //TODO
+            throw new Exception("Wrong privilege.");
         } catch (InternalServerErrorException ex) {
-            //TODO
+            throw new Exception("Unexpected error happened.");
         } catch (ServiceUnavailableException ex) {
-            //TODO
+            throw new Exception("Unable to process. Try again later.");
         }
         return result;
     }
 
     @Override
-    public List<User> findUsersByPrivilege(Privilege privilege) {
+    public List<User> findUsersByPrivilege(Privilege privilege) throws Exception {
         List<User> result = null;
         try {
             result = clientUser.findByPrivilege(getSessionCode(), new GenericType<List<User>>() {
@@ -409,33 +408,33 @@ public class ClientImplementation implements Client {
             reLogin();
             findUsersByPrivilege(privilege);
         } catch (ForbiddenException ex) {
-            //TODO
+            throw new Exception("Wrong privilege.");
         } catch (InternalServerErrorException ex) {
-            //TODO
+            throw new Exception("Unexpected error happened.");
         } catch (ServiceUnavailableException ex) {
-            //TODO
+            throw new Exception("Unable to process. Try again later.");
         }
         return result;
     }
 
     @Override
-    public void removeUser(String userId) {
+    public void removeUser(String userId) throws Exception {
         try {
             clientUser.remove(getSessionCode(), userId);
         } catch (NotAuthorizedException ex) {
             reLogin();
             removeUser(userId);
         } catch (ForbiddenException ex) {
-            //TODO
+            throw new Exception("Wrong privilege.");
         } catch (InternalServerErrorException ex) {
-            //TODO
+            throw new Exception("Unexpected error happened.");
         } catch (ServiceUnavailableException ex) {
-            //TODO
+            throw new Exception("Unable to process. Try again later.");
         }
     }
 
     @Override
-    public User login(User loginData) throws Exception{
+    public User login(User loginData) throws Exception {
         Session result = null;
         try {
             loginData.setPassword(Encrypt.cifrarTexto(loginData.getPassword()));
@@ -446,26 +445,26 @@ public class ClientImplementation implements Client {
         } catch (NotAuthorizedException ex) {
             throw new Exception("The entered password is wrong.");
         } catch (InternalServerErrorException ex) {
-            //TODO
+            throw new Exception("Unexpected error happened.");
         } catch (ServiceUnavailableException ex) {
-            //TODO
+            throw new Exception("Unable to process. Try again later.");
         }
         return result.getLogged();
     }
 
     @Override
-    public void forgottenPassword(User userData) {
+    public void forgottenPassword(User userData) throws Exception {
         try {
             clientUser.forgottenpasswd(userData.getEmail(), userData.getLogin());
         } catch (InternalServerErrorException ex) {
-            //TODO
+            throw new Exception("Unexpected error happened.");
         } catch (ServiceUnavailableException ex) {
-            //TODO
+            throw new Exception("Unable to process. Try again later.");
         }
     }
 
     @Override
-    public String emailConfirmation(User user) {
+    public String emailConfirmation(User user) throws Exception {
         String result = null;
         try {
             result = clientUser.emailConfirmation(getSessionCode(), user, String.class);
@@ -473,11 +472,11 @@ public class ClientImplementation implements Client {
             reLogin();
             emailConfirmation(user);
         } catch (ForbiddenException ex) {
-            //TODO
+            throw new Exception("Wrong privilege.");
         } catch (InternalServerErrorException ex) {
-            //TODO
+            throw new Exception("Unexpected error happened.");
         } catch (ServiceUnavailableException ex) {
-            //TODO
+            throw new Exception("Unable to process. Try again later.");
         }
         return result;
     }
@@ -492,7 +491,7 @@ public class ClientImplementation implements Client {
 
             sitio = sitio.replace(" ", "%20");
             sitio = sitio.replace("ñ", "n");
-            URL url = new URL("https://geocoder.api.here.com/6.2/geocode.json?searchtext=" + sitio + "&app_id=w4M9GIVbS5uVCLiCyGKV&app_code=JOPGDZHGQJ7FpUVmbfm4KA" + "&language=en-en");
+            URL url = new URL("https://geocoder.api.here.com/6.2/geocode.json?searchtext=" + sitio + "&app_id=" + HERE_ID + "&app_code=" + HERE_CODE + "&language=en-en");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             conn.connect();
@@ -604,7 +603,7 @@ public class ClientImplementation implements Client {
 
         try {
             String inline = "";
-            URL url = new URL("https://route.api.here.com/routing/7.2/calculateroute.json?app_id=w4M9GIVbS5uVCLiCyGKV&app_code=JOPGDZHGQJ7FpUVmbfm4KA" + consulta);
+            URL url = new URL("https://route.api.here.com/routing/7.2/calculateroute.json?app_id=" + HERE_ID + "&app_code=" + HERE_CODE + consulta);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             conn.connect();
@@ -684,7 +683,7 @@ public class ClientImplementation implements Client {
 
         try {
             String inline = "";
-            URL url = new URL("https://matrix.route.api.here.com/routing/7.2/calculatematrix.json?" + query + "app_id=w4M9GIVbS5uVCLiCyGKV&app_code=JOPGDZHGQJ7FpUVmbfm4KA");
+            URL url = new URL("https://matrix.route.api.here.com/routing/7.2/calculatematrix.json?" + query + "app_id=" + HERE_ID + "&app_code=" + HERE_CODE);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             conn.connect();

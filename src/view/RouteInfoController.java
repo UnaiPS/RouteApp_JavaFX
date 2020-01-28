@@ -32,10 +32,10 @@ import model.Route;
 import model.TrafficMode;
 import model.TransportMode;
 import model.User;
-import client.UserRESTClient;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.control.ButtonType;
@@ -63,8 +63,6 @@ public class RouteInfoController {
     
     private ObservableList<Route> routes;
     
-    private UserRESTClient userClient = new UserRESTClient();
-    
     private Client client = ClientFactory.getClient();
     
     private Alert alert;
@@ -72,6 +70,10 @@ public class RouteInfoController {
     private User user;
     
     private List<Direction> directions;
+    
+    ResourceBundle properties = ResourceBundle.getBundle("clientconfig");
+    private final String HERE_ID = properties.getString("hereApiId");
+    private final String HERE_CODE = properties.getString("hereApiCode");
     
     @FXML
     private TextField routeName;
@@ -161,7 +163,14 @@ public class RouteInfoController {
         mode.setItems(modes);
         transportMode.setItems(transModes);
         trafficMode.setItems(traffModes);
-        directions = client.findDirectionsByRoute(route.getId().toString());
+        try {
+            directions = client.findDirectionsByRoute(route.getId().toString());
+        } catch (Exception ex){
+            Alert alert = new Alert(Alert.AlertType.ERROR, ex.getLocalizedMessage());
+            alert.setTitle("Error");
+            alert.showAndWait();
+            LOGGER.severe(ex.getLocalizedMessage());
+        }
         
         stage.show();
     }
@@ -318,7 +327,7 @@ public class RouteInfoController {
             alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("Map");
             alert.setHeaderText("");
-            Image image = new Image("https://image.maps.api.here.com/mia/1.6/?app_id=w4M9GIVbS5uVCLiCyGKV&app_code=JOPGDZHGQJ7FpUVmbfm4KA&e=Q&" + coords + "poithm=1&z=17&w=800&h=600");
+            Image image = new Image("https://image.maps.api.here.com/mia/1.6/?app_id=" + HERE_ID + "&app_code=" + HERE_CODE + "&e=Q&" + coords + "poithm=1&z=17&w=800&h=600");
             ImageView imageView = new ImageView(image);
             alert.setGraphic(null);
             alert.getDialogPane().setContent(imageView);
