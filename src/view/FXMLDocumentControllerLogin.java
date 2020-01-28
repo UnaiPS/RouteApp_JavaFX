@@ -29,6 +29,7 @@ import javafx.scene.control.TextField;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import model.Privilege;
 import model.Session;
 import model.User;
 import org.glassfish.hk2.utilities.reflection.Logger;
@@ -134,20 +135,25 @@ public class FXMLDocumentControllerLogin {
                 user.setLogin(login);
                 user.setPassword(passwd);
                 user = client.login(user);
-
-                Parent root;
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("Admin_Main_Menu.fxml"));
-                root = (Parent) loader.load();
-                Admin_Main_MenuController viewController = loader.getController();
-                viewController.setUser(user);
-                Stage secondStage = new Stage();
-                secondStage.initModality(Modality.APPLICATION_MODAL);
-                viewController.setStage(secondStage);
-                viewController.initStage(root);
-                   
                 
-                txtLogin.clear();
-                txtPassword.clear();
+                if (user.getPrivilege().equals(Privilege.ADMIN)) {
+
+                    Parent root;
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource("Admin_Main_Menu.fxml"));
+                    root = (Parent) loader.load();
+                    Admin_Main_MenuController viewController = loader.getController();
+                    viewController.setUser(user);
+                    Stage secondStage = new Stage();
+                    secondStage.initModality(Modality.APPLICATION_MODAL);
+                    viewController.setStage(secondStage);
+                    viewController.initStage(root);
+
+
+                    txtLogin.clear();
+                    txtPassword.clear();
+                } else {
+                    showError("Non-admin users can only log in the mobile version of the app.");
+                }
             
                 
             
@@ -229,7 +235,7 @@ public class FXMLDocumentControllerLogin {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Error");
         alert.setHeaderText(errorText);
-        alert.show();
+        alert.showAndWait();
     }
     
     /**

@@ -18,7 +18,6 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import client.Client;
 import client.ClientFactory;
-import model.Route;
 import model.User;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -31,7 +30,6 @@ import client.LogicBusinessException;
 public class FXMLDocumentRestorePasswordController {
     private Stage stage;
     private Client cliente = ClientFactory.getClient();
-    private User delivery = null;
     
     
     @FXML
@@ -53,7 +51,7 @@ public class FXMLDocumentRestorePasswordController {
      * @param root 
      */
     public void initStage(Parent root) {
-        stage.setTitle("Assign Route");
+        stage.setTitle("Restore Password");
         stage.setOnShowing(this::handleWindowShowing);
         stage.setOnCloseRequest(this::handleWindowClosing);
         Scene scene = new Scene (root);
@@ -121,12 +119,7 @@ public class FXMLDocumentRestorePasswordController {
      */
     @FXML
     private void handleCancelButtonAction(ActionEvent event){
-        Route route = new Route();
-        route.setAssignedTo(delivery);
-         Alert alert=new Alert(Alert.AlertType.CONFIRMATION,
-                            "The route has been assigned.",
-                            ButtonType.OK);
-            alert.showAndWait();
+         stage.close();
     }
     
     /**
@@ -140,6 +133,8 @@ public class FXMLDocumentRestorePasswordController {
         Optional<ButtonType> okButton = alert.showAndWait();
         if (okButton.isPresent() && okButton.get() == ButtonType.CANCEL) {    
             event.consume();
+        } else if (okButton.isPresent() && okButton.get() == ButtonType.OK) {
+            System.exit(0);
         }
     }
 }

@@ -5,6 +5,7 @@
  */
 package view;
 
+
 import client.Client;
 import client.ClientFactory;
 import client.ClientRoute;
@@ -24,24 +25,33 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.DialogPane;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.PasswordField;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.layout.HBox;
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javax.ws.rs.core.GenericType;
+import model.Coordinate_Route;
+import model.Direction;
 import model.Route;
+import model.Type;
 import model.User;
 
 /**
@@ -93,6 +103,8 @@ public class Admin_Main_MenuController {
     @FXML
     private Button btnDeleteRoute;
     @FXML
+    private Button btnDrawOnMap;
+    @FXML
     private MenuBar menuBar;
     @FXML
     private Menu menuFile;
@@ -138,13 +150,31 @@ public class Admin_Main_MenuController {
         btnCreateRoute.setOnAction(this::handleBtnCreateRoute);
         btnRouteInfoEdit.setOnAction(this::handleBtnRouteInfoEdit);
         btnDeleteRoute.setOnAction(this::handleBtnDeleteRoute);
+        btnDrawOnMap.setOnAction(this::handleBtnDrawOnMap);
         
         submenuAbout.setOnAction(this::handleAboutMenuItem);
         submenuClose.setOnAction(this::handleCloseMenuItem);
         submenuHIW.setOnAction(this::handleHowItWorksMenuItem);
         
         colAssignedTo.setCellValueFactory(new PropertyValueFactory<>("assignedTo"));
-        
+        /*colAssignedTo.setCellFactory(tc-> {
+            TableCell<Word, Integer> cell = new TableCell<>();
+            Text text = new Text();
+            cell.setGraphic(text);
+            text.setTextAlignment(TextAlignment.CENTER);
+            text.setStyle("-fx-fill: -fx-text-background-color;");
+            text.setFontSmoothingType(FontSmoothingType.LCD);
+            text.wrappingWidthProperty().bind(column.widthProperty().subtract(5));
+            text.textProperty().bind(Bindings.createStringBinding(() -> {
+                if (cell.isEmpty()) {
+                    return null ;
+                } else {
+                    return cell.getItem().toString();
+                }
+            }, cell.emptyProperty(), cell.itemProperty()));
+            return cell;  
+        });*/
+
         colCreatedBy.setCellValueFactory(new PropertyValueFactory<>("createdBy"));
         colEnded.setCellValueFactory(new PropertyValueFactory<>("ended"));
         colEstimatedTime.setCellValueFactory(new PropertyValueFactory<>("estimatedTime"));
@@ -157,9 +187,14 @@ public class Admin_Main_MenuController {
         colTransMode.setCellValueFactory(new PropertyValueFactory<>("transportMode"));
         
         //client.findAllRoutes(new GenericType<ArrayList<Route>>(){});
-        routes.addAll(client.findAllRoutes());
-        ObservableList<Route> routesList = FXCollections.observableArrayList(routes);
-        tblRoute.setItems(routesList);
+        try{
+            routes.addAll(client.findAllRoutes());
+            ObservableList<Route> routesList = FXCollections.observableArrayList(routes);
+            tblRoute.setItems(routesList);
+        } catch (NullPointerException ex){
+            LOGGER.severe("No routes found.");
+        }
+        
         
         /*
         The window will show a greating to the user that logs in
@@ -175,11 +210,7 @@ public class Admin_Main_MenuController {
     
     public void handleCloseMenuItem(ActionEvent event){
         LOGGER.info("Close Menu Item pressed");
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure that you want to log out?",ButtonType.YES,ButtonType.NO);
-        Optional<ButtonType> result = alert.showAndWait();
-        if(result.get()==ButtonType.YES){
-            stage.close();
-        }
+        logOut();
         
     }
     
@@ -217,6 +248,44 @@ public class Admin_Main_MenuController {
                 }
             }else{
                 throw new Exception();
+            }
+            
+        }catch(Exception ex){
+            alert = new Alert(Alert.AlertType.ERROR, "No route was selected. Please, select one route to edit or see the information about it.");
+            alert.setTitle("No route selected");
+            alert.showAndWait();
+            LOGGER.severe(ex.getLocalizedMessage());
+        }
+        
+    }
+    
+    public void handleBtnDrawOnMap(ActionEvent e){
+        Alert alert;
+        LOGGER.info("Draw Route button pressed with the Route: ");
+        try{
+            if(!tblRoute.getSelectionModel().getSelectedItem().equals(null)){
+                Route selectedRoute = tblRoute.getSelectionModel().getSelectedItem();
+                String coords = "";
+                for (Coordinate_Route coordinate : selectedRoute.getCoordinates()) {
+                    coords += "waypoint" + (coordinate.getOrder()-1) + "=" + coordinate.getCoordinate().getLatitude()+","+coordinate.getCoordinate().getLongitude() + "&";
+                    coords += "poix" + (coordinate.getOrder()-1) + "=" + coordinate.getCoordinate().getLatitude()+","+coordinate.getCoordinate().getLongitude() + ";";
+                    if (coordinate.getCoordinate().getType().equals(Type.ORIGIN)) {
+                        coords += "red;";
+                    } else if (coordinate.getVisited() == null) {
+                        coords += "blue;";
+                    } else {
+                        coords += "green;";
+                    }
+                    coords += "white;14;"+ coordinate.getOrder() +"&";
+                }
+                alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Map");
+                alert.setHeaderText("");
+                Image image = new Image("https://image.maps.api.here.com/mia/1.6/routing?app_id=w4M9GIVbS5uVCLiCyGKV&app_code=JOPGDZHGQJ7FpUVmbfm4KA&e=Q&" + coords + "lc=1652B4&lw=6&t=0&w=800&h=600");
+                ImageView imageView = new ImageView(image);
+                alert.setGraphic(null);
+                alert.getDialogPane().setContent(imageView);
+                alert.showAndWait();
             }
             
         }catch(Exception ex){
@@ -341,11 +410,7 @@ public class Admin_Main_MenuController {
     
     public void handleBtnLogOut(ActionEvent e){
         LOGGER.info("Log Out button pressed, returning to the Login window...");
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure that you want to log out?",ButtonType.YES,ButtonType.NO);
-        Optional<ButtonType> result = alert.showAndWait();
-        if(result.get()==ButtonType.YES){
-            stage.close();
-        }
+        logOut();
     }
     
     public void handleWindowShowing(WindowEvent e){
@@ -371,6 +436,15 @@ public class Admin_Main_MenuController {
     
     public void handleWindowClosing(WindowEvent e){
         LOGGER.info("The window was attempted to be closed");
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "");
+        alert.setTitle("Close");
+        alert.setHeaderText("Are you sure that you want to close the application?");
+        Optional<ButtonType> okButton = alert.showAndWait();
+        if (okButton.isPresent() && okButton.get() == ButtonType.CANCEL) {    
+            e.consume();
+        } else if (okButton.isPresent() && okButton.get() == ButtonType.OK) {
+            System.exit(0);
+        }
     }
     
     /**
@@ -404,6 +478,13 @@ public class Admin_Main_MenuController {
         return routes;
     }
     
-    
+    public void logOut(){
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure that you want to log out?",ButtonType.YES,ButtonType.NO);
+        Optional<ButtonType> result = alert.showAndWait();
+        if(result.get()==ButtonType.YES){
+            client.setCode("");
+            stage.close();
+        }
+    }
     
 }

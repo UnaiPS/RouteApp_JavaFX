@@ -24,6 +24,11 @@
             <Font size="14.0" />
          </font>
       </Button>
+      <Button id="btnRestorePassword" fx:id="btnRestorePassword" layoutX="230.0" layoutY="289.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="139.0" text="Restore password">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </Button>
       <Button id="btnLogin" fx:id="btnLogin" layoutX="433.0" layoutY="289.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="139.0" text="Login">
          <font>
             <Font size="14.0" />
@@ -39,10 +44,5 @@
             <Font size="18.0" />
          </font>
       </Text>
-      <Button id="btnRestorePassword" fx:id="btnRestorePassword" layoutX="230.0" layoutY="289.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="139.0" text="Restore password">
-         <font>
-            <Font size="14.0" />
-         </font>
-      </Button>
    </children>
 </AnchorPane>

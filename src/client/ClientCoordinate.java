@@ -34,6 +34,12 @@ public class ClientCoordinate {
         webTarget = client.target(BASE_URI).path("routeappjpa.coordinate");
     }
 
+    public <T> T find(String code, Class<T> responseType, String id) throws ClientErrorException {
+        WebTarget resource = webTarget;
+        resource = resource.path(java.text.MessageFormat.format("{0}/{1}", new Object[]{code, id}));
+        return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
+    }
+    
     public <T> T findDirectionsByType(String code, GenericType<T> responseType, String type) throws ClientErrorException {
         WebTarget resource = webTarget;
         resource = resource.path(java.text.MessageFormat.format("direction/type/{0}/{1}", new Object[]{code,type}));

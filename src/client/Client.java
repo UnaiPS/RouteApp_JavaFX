@@ -11,8 +11,10 @@ import model.Coordinate;
 import model.Coordinate_Route;
 import model.Direction;
 import model.FullRoute;
+import model.Mode;
 import model.Privilege;
 import model.Route;
+import model.TransportMode;
 import model.Type;
 import model.User;
 
@@ -21,6 +23,8 @@ import model.User;
  * @author Jon Calvo Gaminde
  */
 public interface Client {
+    
+    public void setCode(String code);
 
     //Route Client
 
@@ -37,6 +41,8 @@ public interface Client {
     public void removeRoute(String routeId);
     
     //Coordinate Client
+    
+    public Coordinate findCoordinate(String coordinateId);
     
     public List<Direction> findDirectionsByType(Type type);
     
@@ -60,15 +66,19 @@ public interface Client {
     
     public void removeUser(String userId);
     
-    public User login(User loginData);
+    public User login(User loginData) throws Exception;
     
     public void forgottenPassword(User userData);
     
     public String emailConfirmation(User user);
     
-    public Direction getDirection(String direction) throws LogicBusinessException;
+    //Remote API
+    
+    public Direction getDirection(String direction, Type type) throws LogicBusinessException;
     
     public Route getRoute(ArrayList<String> coords, Route route) throws LogicBusinessException;
+    
+    public int[][] getMatrix(ArrayList<String> coords, Mode mode, TransportMode transport) throws LogicBusinessException;
     
     //public int restorePassword(String email, String login) throws LogicBusinessException;
 }

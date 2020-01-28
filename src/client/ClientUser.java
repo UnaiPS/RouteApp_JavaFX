@@ -96,12 +96,6 @@ public class ClientUser {
          
     }
     
-//    public <T> T forgottenpasswd(Class<T> responseType, String email, String login) throws ClientErrorException {
-//        WebTarget resource = webTarget;
-//        resource = resource.path(java.text.MessageFormat.format("forgottenpasswd/{0}/{1}", new Object[]{email, login}));
-//        return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
-//    }
-    
     public void close() {
         client.close();
     }

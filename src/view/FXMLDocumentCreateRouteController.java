@@ -41,11 +41,13 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import client.LogicBusinessException;
+import com.google.common.collect.Sets;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.Set;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.ContextMenu;
@@ -58,7 +60,12 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Modality;
+import logic.Algorithm;
+import logic.CoordinateSorter;
+import model.Coordinate_Route;
+import model.FullRoute;
 import model.Privilege;
+import model.Type;
 
 /**
  *
@@ -258,7 +265,7 @@ public class FXMLDocumentCreateRouteController {
     @FXML
     private void handleOriginButtonAction(ActionEvent event){
         try {
-            Direction e = this.cliente.getDirection(tfOrigin.getText());
+            Direction e = this.cliente.getDirection(tfOrigin.getText(), Type.ORIGIN);
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "");
             alert.setTitle("Origin");
             alert.setHeaderText("Is this the direction you want?: " + e.getName());
@@ -293,7 +300,7 @@ public class FXMLDocumentCreateRouteController {
     private void handleDestinationButtonAction(ActionEvent event){
         Direction e = new Direction();
         try {
-            e = this.cliente.getDirection(tfDestination.getText());
+            e = this.cliente.getDirection(tfDestination.getText(), Type.DESTINATION);
         } catch (LogicBusinessException ex) {
             LOGGER.severe("Error: "+ex.getLocalizedMessage());
             Alert alert=new Alert(Alert.AlertType.ERROR,
@@ -445,14 +452,16 @@ public class FXMLDocumentCreateRouteController {
         //I'm not doing anything with it bc to implement it I would have to change the
         //server and at this point no es plan
         deadline = dpDeadLine.getValue();
-        Instant instant = Instant.from(deadline.atStartOfDay(ZoneId.systemDefault()));
-        Date date = Date.from(instant);
+        //Instant instant = Instant.from(deadline.atStartOfDay(ZoneId.systemDefault()));
+        //Date date = Date.from(instant);
         
         //Here I set the route's data.
         Route route = new Route();
         route.setCreatedBy(user);
         route.setAssignedTo(delivery);
         route.setName(tfName.getText());
+        route.setStarted(false);
+        route.setEnded(false);
         if(rdbtnBalanced.isSelected()) route.setMode(Mode.BALANCED);
         else if(rdbtnFastest.isSelected()) route.setMode(Mode.FASTEST);
         else route.setMode(Mode.SHORTEST);
@@ -474,9 +483,41 @@ public class FXMLDocumentCreateRouteController {
             coords.add(coord);
         }
         
+        
         try {
+            String shortest = "01";
+            if (coords.size() > 2) {
+                shortest = Algorithm.getShortestRoute(cliente.getMatrix(coords, route.getMode(), route.getTransportMode()));
+                coords = CoordinateSorter.sortByPattern(coords, shortest);
+            }
+                
+            
             route = cliente.getRoute(coords, route);
             //HERE WE HAVE TO CALL THE SERVER TO SAVE THE ROUTE AND THE DIRECTIONS AND EVERYTHING.
+            
+            
+            Set<Direction> directions = Sets.newHashSet();
+            directions.add(originJIC);
+            directions.addAll(directionsJIC);
+            route.setCoordinates(Sets.newHashSet());
+            
+            for (int i = 0; i < shortest.length(); i++) {
+                Direction direction;
+                if (i == 0){
+                    direction = originJIC;
+                } else {
+                    direction = directionsJIC.get(i-1);
+                }
+                Coordinate_Route coorRout = new Coordinate_Route();
+                coorRout.setCoordinate(direction.getCoordinate());
+                coorRout.setOrder(Character.getNumericValue(shortest.charAt(i))+1);
+                route.getCoordinates().add(coorRout);
+            }
+            
+            FullRoute fullRoute = new FullRoute();
+            fullRoute.setRoute(route);
+            fullRoute.setDirections(directions);
+            cliente.createRoute(fullRoute);
         } catch (LogicBusinessException ex) {
             LOGGER.severe("Error: "+ex.getLocalizedMessage());
         }
@@ -498,6 +539,8 @@ public class FXMLDocumentCreateRouteController {
         Optional<ButtonType> okButton = alert.showAndWait();
         if (okButton.isPresent() && okButton.get() == ButtonType.CANCEL) {    
             event.consume();
+        } else if (okButton.isPresent() && okButton.get() == ButtonType.OK) {
+            System.exit(0);
         }
     }  
     @FXML
