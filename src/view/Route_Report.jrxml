@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report name" pageWidth="595" pageHeight="842" columnWidth="535" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="aefcb52e-66b9-4f59-a552-80150c91e8f2">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<field name="name" class="java.lang.String"/>
+	<field name="createdBy" class="model.User"/>
+	<field name="assignedTo" class="model.User"/>
+	<field name="totalDistance" class="java.lang.Double"/>
+	<field name="estimatedTime" class="java.lang.Integer"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="79" splitType="Stretch">
+			<staticText>
+				<reportElement x="202" y="22" width="151" height="32" uuid="d468a52f-7770-415e-b727-4bc462df74d0"/>
+				<textElement textAlignment="Justified">
+					<font fontName="Arial" size="24"/>
+				</textElement>
+				<text><![CDATA[Route Report]]></text>
+			</staticText>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="35" splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="23" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="100" height="20" uuid="2374a67b-10a9-45d9-951a-27362627f958"/>
+				<textElement textAlignment="Justified">
+					<font fontName="Arial" size="12" isUnderline="true"/>
+				</textElement>
+				<text><![CDATA[Name]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="102" y="0" width="100" height="20" uuid="7505b5e9-380d-44c4-99be-8522e68f14db"/>
+				<textElement textAlignment="Justified">
+					<font fontName="Arial" size="12" isUnderline="true"/>
+				</textElement>
+				<text><![CDATA[Created By]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="202" y="0" width="100" height="20" uuid="b0834776-1130-437b-ab79-b508d21e22a4"/>
+				<textElement>
+					<font size="12" isUnderline="true"/>
+				</textElement>
+				<text><![CDATA[Assigned To]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="302" y="0" width="100" height="20" uuid="5b3d7e65-9d76-44e4-847c-f3b22b53814f"/>
+				<textElement>
+					<font size="12" isUnderline="true"/>
+				</textElement>
+				<text><![CDATA[Total Distance]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="402" y="0" width="100" height="20" uuid="986e68ce-c35c-4a8a-afda-1363aefb5a9a"/>
+				<textElement>
+					<font size="12" isUnderline="true"/>
+				</textElement>
+				<text><![CDATA[Estimated Time]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="645" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="100" height="20" uuid="a16a2414-4cd6-4018-aa10-a3c5ea1e864b"/>
+				<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="102" y="0" width="100" height="20" uuid="a020deba-7fdf-4269-840f-1a0f1512d252"/>
+				<textFieldExpression><![CDATA[$F{createdBy}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="202" y="0" width="100" height="20" uuid="363a1078-e51e-4c96-a089-e8a47a716c8a"/>
+				<textFieldExpression><![CDATA[$F{assignedTo}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="302" y="0" width="100" height="20" uuid="1b6aae77-3edf-4c44-af65-8857cbbfab7f"/>
+				<textFieldExpression><![CDATA[$F{totalDistance}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="402" y="0" width="100" height="20" uuid="1f4c10e9-922d-4548-9ce0-e260093eaf3d"/>
+				<textFieldExpression><![CDATA[$F{estimatedTime}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="45" splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="54" splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band height="42" splitType="Stretch"/>
+	</summary>
+</jasperReport>
