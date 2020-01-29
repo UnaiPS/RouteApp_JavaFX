@@ -27,7 +27,7 @@ public class ClientCoordinate {
 
     private WebTarget webTarget;
     private Client client;
-    private static final String BASE_URI = "http://localhost:8080/RouteApp_Server/webresources";
+    private static final String BASE_URI = "http://192.168.21.49:8080/RouteApp_Server/webresources";
 
     public ClientCoordinate() {
         client = javax.ws.rs.client.ClientBuilder.newClient();
