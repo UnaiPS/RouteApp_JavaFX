@@ -128,6 +128,8 @@ public class FXMLDocumentControllerLogin {
         //The limiter should do its job, but this code double checks
         if (login.length() > 30 || specialChars) {
             showError("You must enter a valid username.");
+        } else if (passwd.length() > 100) {
+            showError("You must enter a valid password.");
         } else if (login.length() < 1 || passwd.length() < 1) {
             showError("You must enter a username and a password.");
         } else {
