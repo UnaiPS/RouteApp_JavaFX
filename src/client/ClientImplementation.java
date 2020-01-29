@@ -88,7 +88,7 @@ public class ClientImplementation implements Client {
     private void reLogin() {
         TextInputDialog dialog = new TextInputDialog("");
         dialog.setTitle("Re-login requiered");
-        dialog.setHeaderText("Due to inactivity, you must login again.");
+        dialog.setHeaderText("Due to inactivity, you must login again.\nMake sure your system clock is in sync with the Internet time.");
         dialog.setGraphic(null);
 
         TextField tf = new TextField();
