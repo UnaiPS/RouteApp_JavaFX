@@ -298,22 +298,6 @@ public class ClientImplementation implements Client {
         return result;
     }
 
-    @Override
-    public void markDestinationAsVisited(Coordinate gpsCoordinate, Coordinate_Route visitedDestination) throws Exception {
-        try {
-            clientCoordinate.markDestinationVisited(getSessionCode(), visitedDestination, String.valueOf(gpsCoordinate.getLatitude()), String.valueOf(gpsCoordinate.getLongitude()));
-        } catch (NotAuthorizedException ex) {
-            reLogin();
-            markDestinationAsVisited(gpsCoordinate, visitedDestination);
-        } catch (ForbiddenException ex) {
-            throw new Exception("Wrong privilege.");
-        } catch (InternalServerErrorException ex) {
-            throw new Exception("Unexpected error happened.");
-        } catch (ServiceUnavailableException ex) {
-            throw new Exception("Unable to process. Try again later.");
-        }
-    }
-
     //User ClientImplementation
     @Override
     public void createUser(User user) throws Exception {

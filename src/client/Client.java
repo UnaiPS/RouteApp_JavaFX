@@ -48,8 +48,6 @@ public interface Client {
     
     public List<Direction> findDirectionsByRoute(String routeId ) throws Exception;
     
-    public void markDestinationAsVisited(Coordinate gpsCoordinate, Coordinate_Route visitedDestination ) throws Exception;
-    
     //User Client
     
     public void createUser(User user ) throws Exception;
@@ -79,6 +77,4 @@ public interface Client {
     public Route getRoute(ArrayList<String> coords, Route route) throws LogicBusinessException;
     
     public int[][] getMatrix(ArrayList<String> coords, Mode mode, TransportMode transport) throws LogicBusinessException;
-    
-    //public int restorePassword(String email, String login) throws LogicBusinessException;
 }
