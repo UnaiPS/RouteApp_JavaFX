@@ -518,8 +518,11 @@ public class FXMLDocumentCreateRouteController {
             fullRoute.setRoute(route);
             fullRoute.setDirections(directions);
             cliente.createRoute(fullRoute);
-        } catch (LogicBusinessException ex) {
-            LOGGER.severe("Error: "+ex.getLocalizedMessage());
+        } catch (Exception ex) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, ex.getLocalizedMessage());
+            alert.setTitle("Error");
+            alert.showAndWait();
+            LOGGER.severe(ex.getLocalizedMessage());
         }
         
         Alert alert=new Alert(Alert.AlertType.INFORMATION,

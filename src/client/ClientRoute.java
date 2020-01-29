@@ -27,11 +27,10 @@ public class ClientRoute {
 
     private WebTarget webTarget;
     private Client client;
-    private static final String BASE_URI = "http://localhost:8080/RouteApp_Server/webresources";
 
-    public ClientRoute() {
+    public ClientRoute(String baseURI) {
         client = javax.ws.rs.client.ClientBuilder.newClient();
-        webTarget = client.target(BASE_URI).path("routeappjpa.route");
+        webTarget = client.target(baseURI).path("routeappjpa.route");
     }
 
     public void edit(String code, Object requestEntity) throws ClientErrorException {

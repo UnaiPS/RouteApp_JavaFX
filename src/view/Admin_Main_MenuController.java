@@ -13,6 +13,7 @@ import encryption.Hasher;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Optional;
+import java.util.ResourceBundle;
 import java.util.logging.Logger;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -72,6 +73,10 @@ public class Admin_Main_MenuController {
     private ArrayList<Route> routes = new ArrayList<Route>();
     
     private Client client = ClientFactory.getClient();
+    
+    ResourceBundle properties = ResourceBundle.getBundle("clientconfig");
+    private final String HERE_ID = properties.getString("hereApiId");
+    private final String HERE_CODE = properties.getString("hereApiCode");
     
     
     @FXML
@@ -157,23 +162,7 @@ public class Admin_Main_MenuController {
         submenuHIW.setOnAction(this::handleHowItWorksMenuItem);
         
         colAssignedTo.setCellValueFactory(new PropertyValueFactory<>("assignedTo"));
-        /*colAssignedTo.setCellFactory(tc-> {
-            TableCell<Word, Integer> cell = new TableCell<>();
-            Text text = new Text();
-            cell.setGraphic(text);
-            text.setTextAlignment(TextAlignment.CENTER);
-            text.setStyle("-fx-fill: -fx-text-background-color;");
-            text.setFontSmoothingType(FontSmoothingType.LCD);
-            text.wrappingWidthProperty().bind(column.widthProperty().subtract(5));
-            text.textProperty().bind(Bindings.createStringBinding(() -> {
-                if (cell.isEmpty()) {
-                    return null ;
-                } else {
-                    return cell.getItem().toString();
-                }
-            }, cell.emptyProperty(), cell.itemProperty()));
-            return cell;  
-        });*/
+        
 
         colCreatedBy.setCellValueFactory(new PropertyValueFactory<>("createdBy"));
         colEnded.setCellValueFactory(new PropertyValueFactory<>("ended"));
@@ -193,6 +182,11 @@ public class Admin_Main_MenuController {
             tblRoute.setItems(routesList);
         } catch (NullPointerException ex){
             LOGGER.severe("No routes found.");
+        } catch (Exception ex){
+            Alert alert = new Alert(Alert.AlertType.ERROR, ex.getLocalizedMessage());
+            alert.setTitle("Something went wrong");
+            alert.showAndWait();
+            LOGGER.severe(ex.getLocalizedMessage());
         }
         
         
@@ -281,7 +275,7 @@ public class Admin_Main_MenuController {
                 alert = new Alert(Alert.AlertType.INFORMATION);
                 alert.setTitle("Map");
                 alert.setHeaderText("");
-                Image image = new Image("https://image.maps.api.here.com/mia/1.6/routing?app_id=w4M9GIVbS5uVCLiCyGKV&app_code=JOPGDZHGQJ7FpUVmbfm4KA&e=Q&" + coords + "lc=1652B4&lw=6&t=0&w=800&h=600");
+                Image image = new Image("https://image.maps.api.here.com/mia/1.6/routing?app_id=" + HERE_ID + "&app_code=" + HERE_CODE + "&e=Q&" + coords + "lc=1652B4&lw=6&t=0&w=800&h=600");
                 ImageView imageView = new ImageView(image);
                 alert.setGraphic(null);
                 alert.getDialogPane().setContent(imageView);
@@ -348,7 +342,7 @@ public class Admin_Main_MenuController {
             viewController.initStage(root);
             this.stage.close();
         } catch (Exception ex) {
-            alert = new Alert(Alert.AlertType.ERROR, "Something went wrong opening Create Route window, please try later or restart the programm");
+            alert = new Alert(Alert.AlertType.ERROR, "Something went wrong opening Create Route window, please try later or restart the program.");
             alert.setTitle("Something went wrong");
             alert.showAndWait();
             LOGGER.severe(ex.getLocalizedMessage());

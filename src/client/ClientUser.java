@@ -31,11 +31,10 @@ public class ClientUser {
 
     private WebTarget webTarget;
     private Client client;
-    private static final String BASE_URI = "http://localhost:8080/RouteApp_Server/webresources";
 
-    public ClientUser() {
+    public ClientUser(String baseURI) {
         client = javax.ws.rs.client.ClientBuilder.newClient();
-        webTarget = client.target(BASE_URI).path("routeappjpa.user");
+        webTarget = client.target(baseURI).path("routeappjpa.user");
     }
 
     public void forgottenpasswd(String email, String login) throws ClientErrorException {

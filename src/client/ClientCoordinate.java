@@ -27,11 +27,10 @@ public class ClientCoordinate {
 
     private WebTarget webTarget;
     private Client client;
-    private static final String BASE_URI = "http://localhost:8080/RouteApp_Server/webresources";
 
-    public ClientCoordinate() {
+    public ClientCoordinate(String baseURI) {
         client = javax.ws.rs.client.ClientBuilder.newClient();
-        webTarget = client.target(BASE_URI).path("routeappjpa.coordinate");
+        webTarget = client.target(baseURI).path("routeappjpa.coordinate");
     }
 
     public <T> T find(String code, Class<T> responseType, String id) throws ClientErrorException {
@@ -52,24 +51,6 @@ public class ClientCoordinate {
         return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
     }
 
-    public void markDestinationVisited(String code, Object requestEntity, String latitude, String longitude) throws ClientErrorException {
-        webTarget.path(java.text.MessageFormat.format("direction/visited/{0}/{1}/{2}", new Object[]{code,latitude,longitude})).request(javax.ws.rs.core.MediaType.APPLICATION_XML).put(javax.ws.rs.client.Entity.entity(requestEntity, javax.ws.rs.core.MediaType.APPLICATION_XML));
-    }
-    /*
-    public void createDirection(Object requestEntity) throws ClientErrorException {
-        webTarget.path("direction").request(javax.ws.rs.core.MediaType.APPLICATION_XML).post(javax.ws.rs.client.Entity.entity(requestEntity, javax.ws.rs.core.MediaType.APPLICATION_XML));
-    }
-
-    public void createCoordinate(Object requestEntity) throws ClientErrorException {
-        webTarget.request(javax.ws.rs.core.MediaType.APPLICATION_XML).post(javax.ws.rs.client.Entity.entity(requestEntity, javax.ws.rs.core.MediaType.APPLICATION_XML));
-    }
-
-    public <T> T findByType(Class<T> responseType, String type) throws ClientErrorException {
-        WebTarget resource = webTarget;
-        resource = resource.path(java.text.MessageFormat.format("type/{0}", new Object[]{type}));
-        return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
-    }
-    */
     public void close() {
         client.close();
     }

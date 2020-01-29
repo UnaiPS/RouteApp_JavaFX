@@ -221,7 +221,11 @@ public class FXMLDocumentControllerUserProfile{
      */
     public void handleBtPassword(ActionEvent e){
         String emailCode= "";
-        emailCode = client.emailConfirmation(user);
+        try {
+            emailCode = client.emailConfirmation(user);
+        } catch (Exception ex) {
+            showError(ex.getLocalizedMessage());
+        }
         TextInputDialog dialog = new TextInputDialog("");
         dialog.setTitle("Email confirmation");
         dialog.setHeaderText("Identity confirmation by email requiered.");

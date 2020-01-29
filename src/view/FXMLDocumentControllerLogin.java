@@ -158,7 +158,7 @@ public class FXMLDocumentControllerLogin {
                 
             
             } catch (Exception e) {
-                showError("Unexpected error happened.");
+                showError(e.getLocalizedMessage());
                 java.util.logging.Logger.getLogger(FXMLDocumentControllerLogin.class.getName()).log(Level.SEVERE, null, e);
             /*} catch (NoThreadAvailableException e) {
                 Alert alert = new Alert(AlertType.ERROR);
