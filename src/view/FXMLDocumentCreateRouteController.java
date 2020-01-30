@@ -158,7 +158,7 @@ public class FXMLDocumentCreateRouteController {
         
         //Creation of the context menu
         ContextMenu cm = new ContextMenu();
-        MenuItem delete = new MenuItem("Delete");
+        MenuItem delete = new MenuItem("Delete Row");
         cm.getItems().add(delete);
         
         //Shows the context menu when clicking the table with the right mouse button
