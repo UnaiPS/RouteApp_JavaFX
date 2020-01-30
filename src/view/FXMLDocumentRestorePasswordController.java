@@ -34,7 +34,7 @@ public class FXMLDocumentRestorePasswordController {
     
     @FXML
     private Button btnRestorePassword;
-     @FXML
+    @FXML
     private Button btnCancel;
     @FXML
     private TextField tfEmail;

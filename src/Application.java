@@ -21,17 +21,9 @@ public class Application extends javafx.application.Application  {
     
     @Override
     public void start(Stage stage) throws IOException  {
-            /*user.setFullName("Usuario Nombrecompleto");
-            user.setLogin("LoginUsuario");
-            user.setPassword("Contrasegna");
-            user.setLastAccess(Date.from(Instant.now()));
-            user.setLastPasswordChange(Date.from(Instant.now()));
-            user.setEmail("usuario@ejemplo.hya");*/
-
             FXMLLoader loader = new FXMLLoader(getClass().getResource("view/LogIn.fxml"));
             Parent root = (Parent) loader.load();
             FXMLDocumentControllerLogin viewController = loader.getController();
-            //viewController.setUser(user);
             viewController.setStage(stage);
             viewController.initStage(root);
     }
