@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Text?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1080.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.RouteInfoController">
+<AnchorPane id="routeInfoPane" fx:id="routeInfoPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1080.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.RouteInfoController">
    <children>
       <Text layoutX="85.0" layoutY="84.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Name:" />
       <TextField id="routeName" fx:id="routeName" layoutX="157.0" layoutY="67.0" />

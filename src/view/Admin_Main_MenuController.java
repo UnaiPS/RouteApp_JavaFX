@@ -12,6 +12,9 @@ import client.ClientRoute;
 import encryption.Hasher;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
@@ -54,6 +57,13 @@ import model.Direction;
 import model.Route;
 import model.Type;
 import model.User;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperCompileManager;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
+import net.sf.jasperreports.view.JasperViewer;
 
 /**
  * FXML Controller class
@@ -116,6 +126,8 @@ public class Admin_Main_MenuController {
     @FXML
     private MenuItem submenuClose;
     @FXML
+    private MenuItem submenuReport;
+    @FXML
     private Menu menuHelp;
     @FXML
     private MenuItem submenuAbout;
@@ -159,6 +171,7 @@ public class Admin_Main_MenuController {
         
         submenuAbout.setOnAction(this::handleAboutMenuItem);
         submenuClose.setOnAction(this::handleCloseMenuItem);
+        submenuReport.setOnAction(this::handleReportMenuItem);
         submenuHIW.setOnAction(this::handleHowItWorksMenuItem);
         
         colAssignedTo.setCellValueFactory(new PropertyValueFactory<>("assignedTo"));
@@ -196,6 +209,28 @@ public class Admin_Main_MenuController {
         txtgreetingText.setText("Welcome, "+user.getFullName());
         
         stage.show();
+    }
+    
+    public void handleReportMenuItem(ActionEvent event){
+        LOGGER.info("Print Report Menu Item pressed");
+        try {
+            JasperReport report=
+                JasperCompileManager.compileReport(getClass()
+                    .getResourceAsStream("/view/Route_Report.jrxml"));
+            
+            JRBeanCollectionDataSource dataItems=
+                    new JRBeanCollectionDataSource((Collection<Route>)tblRoute.getItems());
+
+            Map<String,Object> parameters=new HashMap<>();
+
+            JasperPrint jasperPrint = JasperFillManager.fillReport(report,parameters,dataItems);
+
+            JasperViewer jasperViewer = new JasperViewer(jasperPrint,false);
+            jasperViewer.setVisible(true);
+        } catch (JRException ex) {
+            //TODO: Alert
+            LOGGER.severe("Error printing report: "+ex.getLocalizedMessage());
+        }
     }
     
     public void handleHowItWorksMenuItem(ActionEvent event){
@@ -296,6 +331,9 @@ public class Admin_Main_MenuController {
         Alert alert;
         try {
             Route selectedRoute = ((Route)tblRoute.getSelectionModel().getSelectedItem());
+            if(selectedRoute==null){
+                throw new Exception();
+            }
             FXMLLoader loader = new FXMLLoader(getClass().getResource("Route Info.fxml"));
             Parent root = null;
             try {
@@ -426,6 +464,7 @@ public class Admin_Main_MenuController {
         submenuAbout.setAccelerator(new KeyCodeCombination(KeyCode.A, KeyCodeCombination.CONTROL_ANY));
         submenuHIW.setAccelerator(new KeyCodeCombination(KeyCode.F1));
         submenuClose.setAccelerator(new KeyCodeCombination(KeyCode.C,KeyCodeCombination.CONTROL_ANY));
+        submenuReport.setAccelerator(new KeyCodeCombination(KeyCode.R,KeyCodeCombination.CONTROL_ANY));
     }
     
     public void handleWindowClosing(WindowEvent e){
