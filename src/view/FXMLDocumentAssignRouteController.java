@@ -33,7 +33,7 @@ import model.Privilege;
 
 /**
  *
- * @author Daira Eguzkiza, Unai Pérez Sánchez
+ * @author Daira Eguzkiza
  */
 public class FXMLDocumentAssignRouteController {
     private Stage stage;

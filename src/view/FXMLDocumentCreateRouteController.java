@@ -69,7 +69,7 @@ import model.Type;
 
 /**
  *
- * @author Daira Eguzkiza, Unai Pérez Sánchez
+ * @author Daira Eguzkiza
  */
 public class FXMLDocumentCreateRouteController {
     private Logger LOGGER = Logger.getLogger("view.FXMLDocumentCreateRouteController");
