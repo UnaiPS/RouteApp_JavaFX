@@ -65,19 +65,19 @@
 		</band>
 	</columnHeader>
 	<detail>
-		<band height="645" splitType="Stretch">
+		<band height="23" splitType="Stretch">
 			<textField>
 				<reportElement x="0" y="0" width="100" height="20" uuid="a16a2414-4cd6-4018-aa10-a3c5ea1e864b"/>
 				<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
 			</textField>
-			<!--textField>
+			<textField>
 				<reportElement x="102" y="0" width="100" height="20" uuid="a020deba-7fdf-4269-840f-1a0f1512d252"/>
 				<textFieldExpression><![CDATA[$F{createdBy}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="202" y="0" width="100" height="20" uuid="363a1078-e51e-4c96-a089-e8a47a716c8a"/>
 				<textFieldExpression><![CDATA[$F{assignedTo}]]></textFieldExpression>
-			</textField-->
+			</textField>
 			<textField>
 				<reportElement x="302" y="0" width="100" height="20" uuid="1b6aae77-3edf-4c44-af65-8857cbbfab7f"/>
 				<textFieldExpression><![CDATA[$F{totalDistance}]]></textFieldExpression>

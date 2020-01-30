@@ -331,6 +331,9 @@ public class Admin_Main_MenuController {
         Alert alert;
         try {
             Route selectedRoute = ((Route)tblRoute.getSelectionModel().getSelectedItem());
+            if(selectedRoute==null){
+                throw new Exception();
+            }
             FXMLLoader loader = new FXMLLoader(getClass().getResource("Route Info.fxml"));
             Parent root = null;
             try {
