@@ -52,17 +52,17 @@
       </Text>
       <DatePicker id="dpLastAccess" fx:id="dpLastAccess" disable="true" editable="false" layoutX="765.0" layoutY="183.0" prefHeight="25.0" prefWidth="241.0" />
       <DatePicker id="dpLastChange" fx:id="dpLastChange" disable="true" editable="false" layoutX="765.0" layoutY="223.0" prefHeight="25.0" prefWidth="241.0" />
-      <MenuBar layoutY="2.0">
+      <MenuBar id="menuBar" fx:id="menuBar" layoutY="2.0">
         <menus>
-          <Menu mnemonicParsing="false" text="File">
+          <Menu id="menuFile" fx:id="menuFile" mnemonicParsing="false" text="File">
             <items>
-              <MenuItem mnemonicParsing="false" text="Return to the main menu" />
+              <MenuItem id="menuItemReturn" fx:id="menuItemReturn" mnemonicParsing="false" text="Return to the main menu" />
             </items>
           </Menu>
-          <Menu mnemonicParsing="false" text="Help">
+          <Menu id="menuHelp" fx:id="menuHelp" mnemonicParsing="false" text="Help">
             <items>
-                  <MenuItem mnemonicParsing="false" text="How it works" />
-              <MenuItem mnemonicParsing="false" text="About" />
+                <MenuItem id="menuItemWorks" fx:id="menuItemWorks" mnemonicParsing="false" text="How it works" />
+                <MenuItem id="menuItemAbout" fx:id="menuItemAbout" mnemonicParsing="false" text="About" />
             </items>
           </Menu>
         </menus>

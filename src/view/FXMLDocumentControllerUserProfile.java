@@ -38,13 +38,16 @@ import javafx.stage.WindowEvent;
 import model.User;
 import client.Client;
 import encryption.Encrypt;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
 
 
 
 
 /**
- * FXML Controller class for the Sign Up window
- * @author Unai Pérez Sánchez
+ * FXML Controller class for the User Profile window
+ * @author Jon Calvo Gaminde
  */
 public class FXMLDocumentControllerUserProfile{
     private Logger LOGGER = Logger.getLogger("retoLogin.view.FXMLDocumentControllerUserProfile");
@@ -84,6 +87,18 @@ public class FXMLDocumentControllerUserProfile{
     private Button btPassword;
     @FXML
     private Button btSave;
+    @FXML
+    private MenuBar menuBar;
+    @FXML
+    private Menu menuFile;
+    @FXML
+    private MenuItem menuItemReturn;
+    @FXML
+    private Menu menuHelp;
+    @FXML
+    private MenuItem menuItemAbout;
+    @FXML
+    private MenuItem menuItemWorks;
     /**
      * Initializes the stage
      * @param root The Parent of the scene
@@ -115,6 +130,10 @@ public class FXMLDocumentControllerUserProfile{
         txEmail.setText(user.getEmail());
         dpLastAccess.setValue(LocalDate.of(user.getLastAccess().getYear()+1900, user.getLastAccess().getMonth()+1, user.getLastAccess().getDate()));
         dpLastChange.setValue(LocalDate.of(user.getLastPasswordChange().getYear()+1900,user.getLastPasswordChange().getMonth()+1,user.getLastPasswordChange().getDate()));
+        
+        menuItemAbout.setOnAction(this::handleAboutMenuItem);
+        menuItemReturn.setOnAction(this::handleBtBack);
+        menuItemWorks.setOnAction(this::handleHowItWorksMenuItem);
         
         stage.show();
     }    
@@ -250,6 +269,21 @@ public class FXMLDocumentControllerUserProfile{
         }
     }
     
+    public void handleHowItWorksMenuItem(ActionEvent event){
+        LOGGER.info("How It Works Menu Item pressed");
+    }
+    
+    public void handleAboutMenuItem(ActionEvent event){
+        LOGGER.info("About Menu Item pressed");
+        Alert alert = new Alert(Alert.AlertType.INFORMATION, "Made by Jon Calvo Gaminde, Unai Pérez Sánchez and Daira Eguzkiza Lamelas.");
+        alert.setTitle("About");
+        alert.setHeaderText("Version 1.0");
+        Optional<ButtonType> okButton = alert.showAndWait();
+        if (okButton.isPresent() && okButton.get() == ButtonType.OK) {
+            alert.close();
+        }
+    }
+    
     /**
      * This method handles the actions of the register button (Sign Up)
      * @param e Object of type ActionEvent
@@ -298,15 +332,9 @@ public class FXMLDocumentControllerUserProfile{
                 
             
             }catch(Exception ex){
-                showError("Unexpected error happened.");
+                showError(ex.getLocalizedMessage());
                 LOGGER.severe("Error: "+ex.getLocalizedMessage());
-            /*}catch(Exception ex){
-                showError("The user with the login you are trying to register already exists");
-                LOGGER.severe("Error: "+ex.getLocalizedMessage());
-            }catch(Exception ex){
-                showError("An error has ocurred.");
-                LOGGER.severe("Error exception: "+ex.getLocalizedMessage());
-            */}
+            }
             
         }
     }
