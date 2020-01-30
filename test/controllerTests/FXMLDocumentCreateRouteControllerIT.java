@@ -57,7 +57,7 @@ public class FXMLDocumentCreateRouteControllerIT extends ApplicationTest{
      * Tests if the program won't let the user save a route if they haven't 
      * filled all the fields.
      */
-    @Test
+    //@Test
     public void testAEmptyFields() {
         clickOn("#btnSaveRoute");
         verifyThat("You must enter the route's name.", isVisible());
@@ -99,7 +99,7 @@ public class FXMLDocumentCreateRouteControllerIT extends ApplicationTest{
      * Tests that the app will show an alert if a user tries to enter a route
      * name that is too long.
      */
-    @Test
+    //@Test
     public void testALongRouteName() {
         clickOn("#tfName");
         write(LONGROUTENAME);
@@ -112,7 +112,7 @@ public class FXMLDocumentCreateRouteControllerIT extends ApplicationTest{
      * Tests if the app will show an alert if the user wrote an invalid address on the
      * origin field.
      */
-    @Test
+    //@Test
     public void testBInvalidOriginRoute() {
         clickOn("#tfOrigin");
         write(INVALIDROUTE);
@@ -126,7 +126,7 @@ public class FXMLDocumentCreateRouteControllerIT extends ApplicationTest{
      * destinations field.
      */
     @Test
-    public void testCInvalidDestinationRoute() {
+    public void testBInvalidDestinationRoute() {
         clickOn("#tfDestination");
         write(INVALIDROUTE);
         clickOn("#btnCheckDestination");
@@ -138,7 +138,7 @@ public class FXMLDocumentCreateRouteControllerIT extends ApplicationTest{
      * Tests that the app will show the user the direction the external web api has found.
      */
     @Test
-    public void testBValidOriginRoute() {
+    public void testCAValidOriginRoute() {
         clickOn("#tfOrigin");
         write(VALIDROUTE);
         clickOn("#btnCheckOrigin");
@@ -149,7 +149,7 @@ public class FXMLDocumentCreateRouteControllerIT extends ApplicationTest{
     /**
      * Tests that the app will show the user the direction the external web api has found.
      */
-    @Test
+    //@Test
     public void testCTableShowingDest() {
         clickOn("#tfDestination");
         write(VALIDROUTE);
@@ -168,6 +168,7 @@ public class FXMLDocumentCreateRouteControllerIT extends ApplicationTest{
         clickOn("#tfDestination");
         write(VALIDROUTE);
         clickOn("#btnCheckDestination");
+        verifyThat("Is this the direction you want?: Bilbao, Basque Country, Spain", isVisible());
         clickOn("Aceptar");
         moveTo("#tvDestinations");
         moveBy(-300, -160, Motion.DIRECT);
