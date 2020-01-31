@@ -223,6 +223,20 @@ public class Admin_Main_MenuController {
      */
     public void handleHowItWorksMenuItem(ActionEvent event) {
         LOGGER.info("How It Works Menu Item pressed");
+        try{
+            Parent root = null;
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("help.fxml"));
+            root = (Parent) loader.load();
+            FXMLDocumentControllerHelp viewController = loader.getController();;
+            viewController.initStage(root);
+        } catch (IOException ex) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, ex.getLocalizedMessage());
+            alert.setTitle("Something went wrong.");
+            alert.showAndWait();
+            LOGGER.severe(ex.getLocalizedMessage());
+
+            alert.showAndWait();
+       }
     }
 
     /**

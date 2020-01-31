@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Help page</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            body {
+                font: 16px arial;
+                width: 740px;
+            }            
+            h3 {
+                font: 20px arial;
+                font-weight: bold;
+            }            
+            h4 {
+                font: 18px arial;
+            }
+            span {
+                font: 16px arial;
+                font-style: italic;
+            }
+            img {
+                border: 2px solid black;
+                width: 740px;
+            }
+            p {
+                width: 740px;
+            }
+        </style>    
+    </head>
+    <body>
+        <div>
+            <h3>RouteApp: Help</h3>
+            
+            <h4>Login</h4>
+            <p>This window is the first page of this application. In it, the user can insert their username and password, and click the <span>Log in</span> button to be logged in the application, and access the Main Menu window. If the user has no account, they can click the <span>Sign Up</span> button to access the SignUp window to create an account. If the user does not remember his password, they can click the <span>Restore Password</span> button to access Restore Password window to get a new one.</p>
+            <img src="./helpLogin.png" alt="Login Window."/>
+            
+            <h4>Sign Up</h4>
+            <p>In this is the window, the user can create a new account by inserting 
+                their data in the field, and clicking the <span>Sign Up</span> button. If the register 
+                is succesful, the user will be logged automaticaly and the Main Menu window will show. 
+                Clicking the <span>Cancel</span> button instead shows the Login window again.</p>
+            <img src="./helpSignUp.png" alt="SignUp Window."/>
+            <h4>Restore Password</h4>
+            <p>In this window, the user can receive by email a new password, in case they forgot it. 
+               To do that, they must insert their email and username, and then click on the <span>Restore My Password</span> 
+			   button.</p>
+            <img src="./helpRestorePassword.png" alt="RestorePassword Window."/>
+			<img src="./helpRestorePasswordEmail.png" alt="RestorePassword Email."/>
+			<h4>Main Menu</h4>
+            <p>When the user is logged, this window will show. The user can end their 
+                logged state by clicking the <span>Log Out</span> button. This will 
+                show the Login window again. In the superior menu, the user can log out; see the help page or the about 
+                window. They can also create a report of the routes. The center of the window has a list of routes, and with the right side buttons 
+				the user can create, edit, delete and see on a map the routes. Clicking on the <span>Edit Profile</span> 
+				button, the user can edit their profile after entering their password. On the map, the numbers indicate the order and 
+				the color the type. The red one is an origin, blue ones are unvisited destinations and the green ones visited destinations.</p>
+            <img src="./helpMainMenu.png" alt="MainMenu Window."/>
+			<img src="./helpReport.png" alt="Report Window."/>
+			<img src="./helpRouteMap.png" alt="RouteMap Window."/>
+			<h4>Edit Profile</h4>
+            <p>This window allows the user to change their profile data. They can change the login, email and full name. Clicking 
+			<span>Save Changes</span> button will then save the new data. If the user wish to change their password, first they must 
+				click the <span>Change Password</span> button, and enter the code they will receive in their email.</p>
+            <img src="./helpEditProfile.png" alt="EditProfile Window."/>
+			<img src="./helpEditProfileEmail.png" alt="EditProfile Email."/>
+			<h4>Create Route</h4>
+            <p>In this window, the user can create a new route by giving it a name, selecting the prefered routing options, and 
+				adding an origin and one or more destinations. To do this, the user must write the name of the place in the relevant 
+				field, and then click the adjacent <span>Check</span> button to get the direction. If and unwanted destination is 
+				entered, user can select it in the list and click on <span>Delete</span> to remove it. Optionally, an worker can be assigned to it. 
+				After setting the deadline, the user can click <span>Save Route</span> to save the data.</p>
+            <img src="./helpCreateRoute.png" alt="CreateRoute Window."/>
+			<h4>Edit Route</h4>
+            <p>When a route is selected for editing, the user will access this window, where they can edit some of its data. 
+				A list will show the origin and destinations. If one of them is selected, <span>See Point on Map</span> can be clicked 
+				to show a map with the point marked in blue. If it is a visited destination, an aditional green marker will appear to signalize 
+				the point where the worker was when the destination was marked as visited. Clicking <span>Update or Assign Route</span> 
+				will open the Assign Route Window to change the worker assigned to the route. After the changes, clicking <span>Save Changes</span> 
+				will save them, if this is not wanted, the user can click <span>Return to Main Menu</span> to ignore them.</p>
+            <img src="./helpEditRoute.png" alt="EditRoute Window."/>
+			<img src="./helpPointMap.png" alt="PointMap Window."/>
+			<h4>Assign Route</h4>
+            <p>The Assign Route Window allows the user to change the worker assigned to this route. It also show some relevant 
+			information about the selected route. Clicking the <span>Save Changes</span> buttons will save the modification, and 
+			closing the window will cancel them.</p>
+            <img src="./helpAssignRoute.png" alt="AssignRoute Window."/>
+        </div>
+    </body>
+</html>

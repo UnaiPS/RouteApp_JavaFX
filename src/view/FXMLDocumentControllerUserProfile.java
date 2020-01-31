@@ -275,7 +275,15 @@ public class FXMLDocumentControllerUserProfile {
      * @param event The event of clicking
      */
     public void handleHowItWorksMenuItem(ActionEvent event) {
-        LOGGER.info("How It Works Menu Item pressed");
+        try{
+            Parent root = null;
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("help.fxml"));
+            root = (Parent) loader.load();
+            FXMLDocumentControllerHelp viewController = loader.getController();;
+            viewController.initStage(root);
+        } catch (IOException ex) {
+            showError("Error loading the help window.");
+        }
     }
 
     /**
@@ -284,7 +292,6 @@ public class FXMLDocumentControllerUserProfile {
      * @param event The event of clicking.
      */
     public void handleAboutMenuItem(ActionEvent event) {
-        LOGGER.info("About Menu Item pressed");
         Alert alert = new Alert(Alert.AlertType.INFORMATION, "Made by Jon Calvo Gaminde, Unai Pérez Sánchez and Daira Eguzkiza Lamelas.");
         alert.setTitle("About");
         alert.setHeaderText("Version 1.0");
