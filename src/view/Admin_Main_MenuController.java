@@ -255,7 +255,7 @@ public class Admin_Main_MenuController {
     /**
      * The handler for the delete button.
      *
-     * @param event The event of clicking.
+     * @param e The event of clicking.
      */
     public void handleBtnDeleteRoute(ActionEvent e) {
         Alert alert;
@@ -293,7 +293,7 @@ public class Admin_Main_MenuController {
     /**
      * The handler for the draw on map button.
      *
-     * @param event The event of clicking.
+     * @param e The event of clicking.
      */
     public void handleBtnDrawOnMap(ActionEvent e) {
         Alert alert;
@@ -336,7 +336,7 @@ public class Admin_Main_MenuController {
     /**
      * The handler for the route info button.
      *
-     * @param event The event of clicking.
+     * @param e The event of clicking.
      */
     public void handleBtnRouteInfoEdit(ActionEvent e) {
         LOGGER.info("Route Info/Edit button pressed, opening new window...");
@@ -374,7 +374,7 @@ public class Admin_Main_MenuController {
     /**
      * The handler for the create route button.
      *
-     * @param event The event of clicking.
+     * @param e The event of clicking.
      */
     public void handleBtnCreateRoute(ActionEvent e) {
         LOGGER.info("Create Route button pressed, opening new window...");
@@ -406,7 +406,7 @@ public class Admin_Main_MenuController {
     /**
      * The handler for the profile button.
      *
-     * @param event The event of clicking.
+     * @param e The event of clicking.
      */
     public void handleBtnProfile(ActionEvent e) {
         LOGGER.info("Profile button pressed, opening new window...");
@@ -463,7 +463,7 @@ public class Admin_Main_MenuController {
     /**
      * The handler for the log out button.
      *
-     * @param event The event of clicking.
+     * @param e The event of clicking.
      */
     public void handleBtnLogOut(ActionEvent e) {
         LOGGER.info("Log Out button pressed, returning to the Login window...");
@@ -473,7 +473,7 @@ public class Admin_Main_MenuController {
     /**
      * The handler for the showing of the window.
      *
-     * @param event The event of showing.
+     * @param e The event of showing.
      */
     public void handleWindowShowing(WindowEvent e) {
         btnCreateRoute.setMnemonicParsing(true);
@@ -500,7 +500,7 @@ public class Admin_Main_MenuController {
     /**
      * The handler for the window closing.
      *
-     * @param event The event of closing.
+     * @param e The event of closing.
      */
     public void handleWindowClosing(WindowEvent e) {
         LOGGER.info("The window was attempted to be closed");

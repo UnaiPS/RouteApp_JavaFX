@@ -217,7 +217,7 @@ public interface Client {
      * A method that asks the external API data about a place and creates a
      * direction of that point.
      *
-     * @param place The string containing the name of the place.
+     * @param direction The string containing the name of the place.
      * @param type The type of direction.
      * @return The direction created with the data.
      * @throws LogicBusinessException An Exception with a message ready to be
