@@ -49,8 +49,9 @@ public class FXMLDocumentControllerLoginIT extends ApplicationTest{
     
     
  
-    @Override public void start(Stage stage) throws Exception {
-      FXMLLoader loader = new FXMLLoader(getClass().getResource("LogIn.fxml"));
+    @Override 
+    public void start(Stage stage) throws Exception {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("LogIn.fxml"));
             Parent root = (Parent) loader.load();
             FXMLDocumentControllerLogin viewController = loader.getController();
             viewController.setStage(stage);

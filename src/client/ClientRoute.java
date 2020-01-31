@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package client;
 
 import javax.ws.rs.ClientErrorException;
@@ -11,15 +6,7 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.GenericType;
 
 /**
- * Jersey REST client generated for REST resource:RouteFacadeREST
- * [routeappjpa.route]<br>
- * USAGE:
- * <pre>
- *        ClientRoute client = new ClientRoute();
- *        Object response = client.XXX(...);
- *        // do whatever with response
- *        client.close();
- * </pre>
+ * Jersey REST client generated for REST resource: RouteFacadeREST
  *
  * @author Unai Pérez Sánchez
  */
@@ -63,12 +50,12 @@ public class ClientRoute {
 
     public <T> T findByAssignedTo(String code, GenericType<T> responseType, String id) throws ClientErrorException {
         WebTarget resource = webTarget;
-        resource = resource.path(java.text.MessageFormat.format("assignedTo/{0}/{1}", new Object[]{code,id}));
+        resource = resource.path(java.text.MessageFormat.format("assignedTo/{0}/{1}", new Object[]{code, id}));
         return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
     }
 
     public void close() {
         client.close();
     }
-    
+
 }

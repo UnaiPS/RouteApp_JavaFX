@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package client;
 
 import javax.ws.rs.ClientErrorException;
@@ -11,17 +6,9 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.GenericType;
 
 /**
- * Jersey REST client generated for REST resource:CoordinateFacadeREST
- * [routeappjpa.coordinate]<br>
- * USAGE:
- * <pre>
- *        ClientCoordinate client = new ClientCoordinate();
- *        Object response = client.XXX(...);
- *        // do whatever with response
- *        client.close();
- * </pre>
+ * Jersey REST client generated for REST resource: CoordinateFacadeREST.
  *
- * @author Unai Pérez Sánchez
+ * @author Jon Calvo Gaminde
  */
 public class ClientCoordinate {
 
@@ -38,21 +25,21 @@ public class ClientCoordinate {
         resource = resource.path(java.text.MessageFormat.format("{0}/{1}", new Object[]{code, id}));
         return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
     }
-    
+
     public <T> T findDirectionsByType(String code, GenericType<T> responseType, String type) throws ClientErrorException {
         WebTarget resource = webTarget;
-        resource = resource.path(java.text.MessageFormat.format("direction/type/{0}/{1}", new Object[]{code,type}));
+        resource = resource.path(java.text.MessageFormat.format("direction/type/{0}/{1}", new Object[]{code, type}));
         return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
     }
-    
+
     public <T> T findDirectionsByRoute(String code, GenericType<T> responseType, String route) throws ClientErrorException {
         WebTarget resource = webTarget;
-        resource = resource.path(java.text.MessageFormat.format("direction/route/{0}/{1}", new Object[]{code,route}));
+        resource = resource.path(java.text.MessageFormat.format("direction/route/{0}/{1}", new Object[]{code, route}));
         return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
     }
 
     public void close() {
         client.close();
     }
-    
+
 }

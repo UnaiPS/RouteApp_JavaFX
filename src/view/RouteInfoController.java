@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package view;
 
 import model.Coordinate_Route;
@@ -32,7 +27,6 @@ import model.Route;
 import model.TrafficMode;
 import model.TransportMode;
 import model.User;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -45,36 +39,35 @@ import javafx.scene.image.ImageView;
 import javax.ws.rs.NotAuthorizedException;
 import model.Coordinate;
 import model.Direction;
-import model.FullRoute;
 import model.Type;
 
 /**
- * FXML Controller class
+ * FXML Controller class for the window Route Info
  *
  * @author Unai Pérez Sánchez
  */
 public class RouteInfoController {
-    
+
     private Logger LOGGER = Logger.getLogger("view.RouteInfoController");
-    
+
     private Stage stage;
-    
+
     private Route route;
-    
+
     private ObservableList<Route> routes;
-    
+
     private Client client = ClientFactory.getClient();
-    
+
     private Alert alert;
-    
+
     private User user;
-    
+
     private List<Direction> directions;
-    
+
     ResourceBundle properties = ResourceBundle.getBundle("clientconfig");
     private final String HERE_ID = properties.getString("hereApiId");
     private final String HERE_CODE = properties.getString("hereApiCode");
-    
+
     @FXML
     private TextField routeName;
     @FXML
@@ -133,63 +126,68 @@ public class RouteInfoController {
         stage.setScene(scene);
         /*
         The window will not be resizable
-        */
+         */
         stage.setResizable(false);
         stage.setTitle("Route Info");
         stage.setOnShowing(this::handleWindowShowing);
         stage.setOnCloseRequest(this::handleWindowClosing);
-        
+
         btnReturnToMainMenu.setOnAction(this::handlebtnReturnToMainMenu);
         btnSeeOnMap.setOnAction(this::handleBtnSeeOnMap);
         btnUpdateAssingRoute.setOnAction(this::handlebtnUpdateAssignRoute);
         btnSaveChanges.setOnAction(this::handlebtnSaveChanges);
-        
+
         ObservableList<Mode> modes = FXCollections.observableArrayList();
         modes.add(Mode.FASTEST);
         modes.add(Mode.BALANCED);
         modes.add(Mode.SHORTEST);
-        
+
         ObservableList<TransportMode> transModes = FXCollections.observableArrayList();
         transModes.add(TransportMode.CAR);
         transModes.add(TransportMode.BICYCLE);
         transModes.add(TransportMode.CAR_HOV);
         transModes.add(TransportMode.PEDESTRIAN);
         transModes.add(TransportMode.TRUCK);
-        
+
         ObservableList<TrafficMode> traffModes = FXCollections.observableArrayList();
         traffModes.add(TrafficMode.ENABLED);
         traffModes.add(TrafficMode.DISABLED);
-        
+
         mode.setItems(modes);
         transportMode.setItems(transModes);
         trafficMode.setItems(traffModes);
         try {
             directions = client.findDirectionsByRoute(route.getId().toString());
-        } catch (Exception ex){
+        } catch (Exception ex) {
             Alert alert = new Alert(Alert.AlertType.ERROR, ex.getLocalizedMessage());
             alert.setTitle("Error");
             alert.showAndWait();
             LOGGER.severe(ex.getLocalizedMessage());
         }
-        
+
         stage.show();
     }
-    
-    public void handlebtnSaveChanges(ActionEvent e){
+
+    /**
+     * The handler for the save changes button
+     *
+     * @param e The event of clicking
+     */
+    public void handlebtnSaveChanges(ActionEvent e) {
         route.setCoordinates(null);
         route.setAssignedTo(route.getAssignedTo());
         route.setMode(mode.getValue());
         route.setName(routeName.getText());
         route.setTrafficMode(trafficMode.getValue());
         route.setTransportMode(transportMode.getValue());
-        try{
+        try {
             client.editRoute(route);
             FXMLLoader loader = new FXMLLoader(getClass().getResource("Admin_Main_Menu.fxml"));
             Parent root = null;
             try {
                 root = (Parent) loader.load();
             } catch (IOException ex) {
-                LOGGER.severe("Error: "+ex.getLocalizedMessage());
+                LOGGER.severe("Error: " + ex.getLocalizedMessage());
             }
             Admin_Main_MenuController viewController = loader.getController();
             Stage stage = new Stage();
@@ -198,21 +196,26 @@ public class RouteInfoController {
             viewController.setStage(stage);
             viewController.initStage(root);
             this.stage.close();
-        }catch(Exception ex){
-            LOGGER.severe("Error: "+ex.getLocalizedMessage());
+        } catch (Exception ex) {
+            LOGGER.severe("Error: " + ex.getLocalizedMessage());
             alert = new Alert(Alert.AlertType.ERROR, "Unexpected error happened");
             alert.showAndWait();
         }
     }
-    
-    public void handlebtnUpdateAssignRoute(ActionEvent e){
+
+    /**
+     * The handler for the assign button
+     *
+     * @param e The event of clicking
+     */
+    public void handlebtnUpdateAssignRoute(ActionEvent e) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("AssignRoute.fxml"));
             Parent root = null;
             try {
                 root = (Parent) loader.load();
             } catch (IOException ex) {
-                LOGGER.severe("Error: "+ex.getLocalizedMessage());
+                LOGGER.severe("Error: " + ex.getLocalizedMessage());
             }
             FXMLDocumentAssignRouteController viewController = loader.getController();
             Stage stage = new Stage();
@@ -222,7 +225,7 @@ public class RouteInfoController {
             viewController.setUser(user);
             viewController.initStage(root);
             this.stage.close();
-            
+
         } catch (Exception ex) {
             alert = new Alert(Alert.AlertType.ERROR, "Something went wrong opening Assign Route window, please try later or restart the programm");
             alert.setTitle("Something went wrong");
@@ -230,15 +233,20 @@ public class RouteInfoController {
             LOGGER.severe(ex.getLocalizedMessage());
         }
     }
-    
-    public void handlebtnReturnToMainMenu(ActionEvent e){
-         try{
+
+    /**
+     * The handler for the return button
+     *
+     * @param e The event of clicking
+     */
+    public void handlebtnReturnToMainMenu(ActionEvent e) {
+        try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("Admin_Main_Menu.fxml"));
             Parent root = null;
             try {
                 root = (Parent) loader.load();
             } catch (IOException ex) {
-                LOGGER.severe("Error: "+ex.getLocalizedMessage());
+                LOGGER.severe("Error: " + ex.getLocalizedMessage());
             }
             Admin_Main_MenuController viewController = loader.getController();
             Stage stage = new Stage();
@@ -247,19 +255,24 @@ public class RouteInfoController {
             viewController.setStage(stage);
             viewController.initStage(root);
             this.stage.close();
-        }catch(NotAuthorizedException ex){
+        } catch (NotAuthorizedException ex) {
             LOGGER.severe("Re-login requiered.");
             alert = new Alert(Alert.AlertType.ERROR, ex.getLocalizedMessage());
             alert.showAndWait();
-        }catch(Exception ex){
-            LOGGER.severe("Error: "+ex.getLocalizedMessage());
+        } catch (Exception ex) {
+            LOGGER.severe("Error: " + ex.getLocalizedMessage());
             alert = new Alert(Alert.AlertType.ERROR, "Unexpected error happened");
             alert.showAndWait();
         }
     }
-    
-    public void handleWindowShowing(WindowEvent e){
-        try{
+
+    /**
+     * The handler for the showing of the window.
+     *
+     * @param e The event of showing.
+     */
+    public void handleWindowShowing(WindowEvent e) {
+        try {
             tblType.setCellValueFactory(cellData -> new SimpleObjectProperty(cellData.getValue().getCoordinate().getType()));
             tblCountry.setCellValueFactory(new PropertyValueFactory<>("country"));
             tblState.setCellValueFactory(new PropertyValueFactory<>("state"));
@@ -270,7 +283,6 @@ public class RouteInfoController {
             tblHouseNumber.setCellValueFactory(new PropertyValueFactory<>("houseNumber"));
             tblPostalCode.setCellValueFactory(new PropertyValueFactory<>("postalCode"));
 
-            
             ObservableList<Direction> directionList = FXCollections.observableArrayList(directions);
 
             directionsInfo.setItems(directionList);
@@ -287,33 +299,41 @@ public class RouteInfoController {
             mode.setValue(route.getMode());
             transportMode.setValue(route.getTransportMode());
             trafficMode.setValue(route.getTrafficMode());
-        } catch(Exception ex) {
+        } catch (Exception ex) {
             LOGGER.severe(ex.getLocalizedMessage());
         }
-        
-        
-        
+
     }
-    
-    public void handleWindowClosing(WindowEvent e){
+
+    /**
+     * The handler for the close window event
+     *
+     * @param e The event of closing
+     */
+    public void handleWindowClosing(WindowEvent e) {
         LOGGER.info("The window was attempted to be closed");
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "");
         alert.setTitle("Close");
         alert.setHeaderText("Are you sure that you want to close the application?");
         Optional<ButtonType> okButton = alert.showAndWait();
-        if (okButton.isPresent() && okButton.get() == ButtonType.CANCEL) {    
+        if (okButton.isPresent() && okButton.get() == ButtonType.CANCEL) {
             e.consume();
         } else if (okButton.isPresent() && okButton.get() == ButtonType.OK) {
             System.exit(0);
         }
     }
-    
-    public void handleBtnSeeOnMap(ActionEvent e){
+
+    /**
+     * The handler for the see on map button
+     *
+     * @param e The event of clicking
+     */
+    public void handleBtnSeeOnMap(ActionEvent e) {
         LOGGER.info("See on Map button pressed.");
         Alert alert;
         try {
-            Direction selectedDirection = ((Direction)directionsInfo.getSelectionModel().getSelectedItem());
-            String coords = "poix0=" + selectedDirection.getCoordinate().getLatitude()+ ","
+            Direction selectedDirection = ((Direction) directionsInfo.getSelectionModel().getSelectedItem());
+            String coords = "poix0=" + selectedDirection.getCoordinate().getLatitude() + ","
                     + selectedDirection.getCoordinate().getLongitude() + ";blue;blue;12;%20&";
             Coordinate_Route coordRoute = route.getCoordinates().stream().filter(coor -> coor.getCoordinate().equals(selectedDirection.getCoordinate())).collect(Collectors.toList()).get(0);
             if (coordRoute.getVisited() != null) {
@@ -321,9 +341,9 @@ public class RouteInfoController {
                 LOGGER.severe(coordRoute.getVisited().toString());
                 Coordinate gps = client.findCoordinate(coordRoute.getVisited().toString());
                 LOGGER.severe(gps.toString());
-                coords += "poix1=" + gps.getLatitude()+ "," + gps.getLongitude() + ";green;green;12;%20&";
+                coords += "poix1=" + gps.getLatitude() + "," + gps.getLongitude() + ";green;green;12;%20&";
             }
-            
+
             alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("Map");
             alert.setHeaderText("");
@@ -338,38 +358,33 @@ public class RouteInfoController {
             alert.showAndWait();
             LOGGER.severe(ex.getLocalizedMessage());
         }
-        
-        
+
     }
-    
-    public void setRoute(Route route){
-        this.route=route;
+
+    //Setters
+    public void setRoute(Route route) {
+        this.route = route;
     }
-    
-    public Route getRoute(){
-        return this.route;
+
+    public void setStage(Stage stage) {
+        this.stage = stage;
     }
-    /**
-     * Setter for the stage
-     * @param stage Object of type Stage
-     */
-    public void setStage(Stage stage){
-        this.stage=stage;
+
+    public void setUser(User user) {
+        this.user = user;
     }
-    /**
-     * Getter for the stage
-     * @return Object of type Stage
-     */
-    public Stage getStage(){
+
+    //Getters
+    public Stage getStage() {
         return stage;
     }
-    
-    public User getUser(){
+
+    public User getUser() {
         return user;
     }
-    
-    public void setUser(User user){
-        this.user=user;
+
+    public Route getRoute() {
+        return this.route;
     }
-    
+
 }

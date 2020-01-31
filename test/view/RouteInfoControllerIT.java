@@ -1,20 +1,13 @@
 package view;
 
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.control.TextField;
-import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import static org.junit.Assert.*;
 import javafx.stage.Stage;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
+import org.loadui.testfx.controls.TextInputControls;
 import static org.testfx.api.FxAssert.verifyThat;
 import org.testfx.framework.junit.ApplicationTest;
 import static org.testfx.matcher.base.NodeMatchers.isVisible;
@@ -27,180 +20,122 @@ import static org.testfx.matcher.base.NodeMatchers.isVisible;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class RouteInfoControllerIT extends ApplicationTest{
-    private static final String USER="username";
-    private static final String PASSWORD="password";
-    private static final String REALUSER="Jon";
-    private static final String REALPASSWORD="abcd*1234";
-    private static final String INVALIDUSERNAME="user$name·?%";
-    private static final String LONGSTRING="owouwuowouwuowouwuowouwuowouwu"
-            + "owouwuowouwuowouwuowouwuowouwu"
-            + "owouwuowouwuowouwuowouwuowouwu"
-            + "owouwuowouwuowouwuowouwuowouwu"
-            + "owouwuowouwuowouwuowouwuowouwu"
-            + "owouwuowouwuowouwuowouwuowouwu"
-            + "owouwuowouwuowouwuowouwuowouwu"
-            + "owouwuowouwuowouwuowouwuowouwu"
-            + "owouwuowouwuowouwuowouwuowouwu";
+    private static boolean firstTime=true;
+    private static final String USER="Jon";
+    private static final String PASSWORD="abcd*1234";
     
     
  
-    @Override public void start(Stage stage) throws Exception {
-      FXMLLoader loader = new FXMLLoader(getClass().getResource("LogIn.fxml"));
+    @Override
+    public void start(Stage stage) throws Exception {
+        if(firstTime){
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("LogIn.fxml"));
             Parent root = (Parent) loader.load();
             FXMLDocumentControllerLogin viewController = loader.getController();
             viewController.setStage(stage);
             viewController.initStage(root);
+            firstTime=false;
+        }
+        
     }
     
-    /**
-     * Tests if when you try to log in without password, the application shows
-     * an alert dialog saying you must enter a password/user.
-     */
     @Test
-    public void testA_LoginButtonWithoutPassword() {
-        clickOn("#txtLogin");
-        write(REALUSER);
-        clickOn("#txtPassword");
-        write("");
-        clickOn("#btnLogin");
-        verifyThat("You must enter a username and a password.", isVisible());
-        clickOn("Aceptar");
-    }
-    
-    /**
-     * Tests if when you try to log in with a non existent user the 
-     * application shows an alert dialog saying that the user doesn't exist.
-     */
-    @Test
-    public void testB_LoginButtonNonExistingUser() {
+    public void testA_GoToRouteInfo(){
         clickOn("#txtLogin");
         write(USER);
         clickOn("#txtPassword");
         write(PASSWORD);
         clickOn("#btnLogin");
-        verifyThat("No user exists for login: " + USER, isVisible());
-        clickOn("Aceptar");
+        Node row=lookup(".table-row-cell").nth(0).query();
+        clickOn(row);
+        clickOn("#btnRouteInfoEdit");
     }
     
-    /**
-     * Tests if when you try to log in without entering a username the 
-     * application shows an alert dialog saying that you must enter a 
-     * username/password.
-     */
     @Test
-    public void testC_LoginButtonWithoutUser() {
-        clickOn("#txtLogin");
-        write("");
-        clickOn("#txtPassword");
-        write(PASSWORD);
-        clickOn("#btnLogin");
-        verifyThat("You must enter a username and a password.", isVisible());
-        clickOn("Aceptar");
+    public void testB_TestModes(){
+        clickOn("#mode");
+        clickOn("FASTEST");
+        verifyThat("FASTEST", isVisible());
+        clickOn("#mode");
+        clickOn("BALANCED");
+        verifyThat("BALANCED", isVisible());
+        clickOn("#mode");
+        clickOn("SHORTEST");
+        verifyThat("SHORTEST", isVisible());
     }
     
-    /**
-     * Tests if when you try to log in with an invalid username the 
-     * application shows an alert dialog saying you must enter a valid
-     * username.
-     */
     @Test
-    public void testD_LoginButtonWithInvalidUsername() {
-        clickOn("#txtLogin");
-        write(INVALIDUSERNAME);
-        clickOn("#txtPassword");
-        write(PASSWORD);
-        clickOn("#btnLogin");
-        verifyThat("You must enter a valid username.", isVisible());
-        clickOn("Aceptar");
+    public void testC_TestTransportModes(){
+        clickOn("#transportMode");
+        clickOn("CAR");
+        verifyThat("CAR", isVisible());
+        clickOn("#transportMode");
+        clickOn("BICYCLE");
+        verifyThat("BICYCLE", isVisible());
+        clickOn("#transportMode");
+        clickOn("CAR_HOV");
+        verifyThat("CAR_HOV", isVisible());
+        clickOn("#transportMode");
+        clickOn("PEDESTRIAN");
+        verifyThat("PEDESTRIAN", isVisible());
+        clickOn("#transportMode");
+        clickOn("TRUCK");
+        verifyThat("TRUCK", isVisible());
     }
     
-    /**
-     * Tests if when you try to log in with a wrong password the application
-     * shows an alert dialog saying that the password is not correct.
-     */
     @Test
-    public void testE_LoginButtonWithWrongPassword() {
-        clickOn("#txtLogin");
-        write(REALUSER);
-        clickOn("#txtPassword");
-        write(PASSWORD);
-        clickOn("#btnLogin");
-        verifyThat("The entered password is wrong.", isVisible());
-        clickOn("Aceptar");
+    public void testD_TestTrafficModes(){
+        clickOn("#trafficMode");
+        clickOn("ENABLED");
+        verifyThat("ENABLED", isVisible());
+        clickOn("#trafficMode");
+        clickOn("DISABLED");
+        verifyThat("DISABLED", isVisible());
     }
     
-    /**
-     * Tests if when you try to enter a really long username it reaches a point
-     * where you can't write more, but if for some reason this fails, it must
-     * show an alert dialog saying that you must enter a valid username).
-     */
-   @Test
-    public void testF_LoginButtonWithLongUsername() {
-        clickOn("#txtLogin");
-        write(LONGSTRING);
-        clickOn("#txtPassword");
-        write(PASSWORD);
-        clickOn("#btnLogin");
-        if("#txtLogin".length()>30){
-           verifyThat("You must enter a valid username.", isVisible());
-        }
-        clickOn("Aceptar");
-    }
-    
-    /**
-     * Tests if when you try to enter a really long password it reaches a point
-     * where you can't write more, but if for some reason this fails, it must
-     * show an alert dialog saying that you must enter a valid password).
-     */
     @Test
-    public void testG_LoginButtonWithLongPassword() {
-        clickOn("#txtLogin");
-        write(USER);
-        clickOn("#txtPassword");
-        write(LONGSTRING);
-        clickOn("#btnLogin");
-        if("#txtPassword".length()>100){
-           verifyThat("You must enter a valid password.", isVisible());
-        }
-        clickOn("Aceptar");
-    }
-    
-    /**
-     * Tests if when you click on the sign up button, another window is opened
-     * showing the sign up options.
-     */
-   @Test
-    public void testH_SignUpBtn() {
-        clickOn("#btnSignUp");
-        verifyThat("Sign Up", isVisible());
-        clickOn("#btnCancel");
-        clickOn("Aceptar");
-        
-    }
-    
-    /**
-     * Tests if when you click on the restore password button, another window is opened
-     * showing the restore password options.
-     */
-   @Test
-    public void testI_RestorePasswordBtn() {
-        clickOn("#btnRestorePassword");
-        verifyThat("Restore My Password", isVisible());
-        clickOn("#btnCancel");
-        
+    public void testE_TestSaving(){
+        clickOn("#routeName");
+        TextInputControls.clearTextIn("#routeName");
+        write("Testing");
+        clickOn("#btnSaveChanges");
+        Node row=lookup(".table-row-cell").nth(0).query();
+        clickOn(row);
+        clickOn("#btnRouteInfoEdit");
+        verifyThat("Testing", isVisible());
     }
     
     
-    /** 
-     * Tests if everything goes right when you enter valid parameters.
-     */
     @Test
-    public void testJ_LoginButtonIfOk() {
-        clickOn("#txtLogin");
-        write(REALUSER);
-        clickOn("#txtPassword");
-        write(REALPASSWORD);
-        clickOn("#btnLogin");
-        verifyThat("#tblRoute", isVisible());
+    public void testF_TestSeeOnMapNotSelected(){
+        clickOn("#btnSeeOnMap");
+        verifyThat("Error", isVisible());
+        clickOn("Aceptar");
     }
+    
+    @Test
+    public void testG_TestSeeOnMap(){
+        Node row=lookup(".table-row-cell").nth(0).query();
+        clickOn(row);
+        clickOn("#btnSeeOnMap");
+        verifyThat("Aceptar", isVisible());
+        clickOn("Aceptar");
+    }
+    
+    @Test
+    public void testH_TestAssign(){
+        clickOn("#btnUpdateAssingRoute");
+        clickOn("#cbAssignTo");
+        clickOn("Repartidor Nombre");
+        clickOn("#btnSaveChanges");
+        clickOn("Aceptar");
+        verifyThat("Repartidor Nombre", isVisible());
+    }
+    
+    @Test
+    public void testI_TestReturn(){
+        clickOn("#btnReturnToMainMenu");
+        verifyThat("#mainMenuPane", isVisible());
+    }
+    
 }

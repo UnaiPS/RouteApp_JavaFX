@@ -1,28 +1,28 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package beans;
 
 import javafx.beans.property.SimpleStringProperty;
 
 /**
+ * Table row bean that is used in FXMLDocumentCreateRouteController
  *
- * @author 2dam
+ * @author Daira Eguzkiza
  */
 public class DirectionTvBean {
+
     private SimpleStringProperty name;
-    
-    public DirectionTvBean(String name){
+
+    //Constructors
+    public DirectionTvBean(String name) {
         this.name = new SimpleStringProperty(name);
     }
-    
-    public String getName(){
+
+    //Getters
+    public String getName() {
         return this.name.get();
     }
-    
-    public void setName(String name){
+
+    //Setters
+    public void setName(String name) {
         this.name.set(name);
     }
 }

@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package view;
 
 import java.util.Optional;
@@ -32,62 +27,61 @@ import javafx.stage.Modality;
 import model.Privilege;
 
 /**
+ * FXML Controller class for the FXMLDocumentAssignRouteController.
  *
- * @author Daira Eguzkiza, Unai Pérez Sánchez
+ * @author Daira Eguzkiza
  */
 public class FXMLDocumentAssignRouteController {
+
     private Stage stage;
     private Client cliente = ClientFactory.getClient();
     private User user;
     private User delivery = null;
     private Route route;
     private Logger LOGGER = Logger.getLogger("retoLogin.view.FXMLDocumentAssignRouteController");
-    
-    
+
     @FXML
     private Button btnSaveChanges;
-    
+
     @FXML
     private TextField tfName;
     @FXML
     private TextField tfEstimatedTime;
     @FXML
     private TextField tfTotalDistance;
-    @FXML 
+    @FXML
     private ComboBox cbAssignTo;
-   
-    public void setStage(Stage stage) {
-        this.stage = stage;
-    }
 
     /**
      * Initializes the stage.
-     * @param root 
+     *
+     * @param root
      */
     public void initStage(Parent root) {
         stage.setTitle("Assign Route");
         stage.setOnShowing(this::handleWindowShowing);
         stage.setOnCloseRequest(this::handleWindowClosing);
-        Scene scene = new Scene (root);
+        Scene scene = new Scene(root);
         stage.setScene(scene);
-        stage.show(); 
+        stage.show();
     }
-    
+
     /**
      * Sets everything the controller needs to be functional. For example, loads
      * the delivery users' list into the combobox.
-     * @param event 
+     *
+     * @param event
      */
     public void handleWindowShowing(WindowEvent event) {
         try {
             stage.setResizable(false);
-            //sets the ComboBox values as Strings so the user can only see their names.
+            //Sets the ComboBox values as Strings so the user can only see their names.
             cbAssignTo.setConverter(new StringConverter<User>() {
                 @Override
                 public String toString(User object) {
                     return object.getFullName();
                 }
-                
+
                 @Override
                 public User fromString(String string) {
                     return null;
@@ -100,34 +94,35 @@ public class FXMLDocumentAssignRouteController {
             cbAssignTo.setPromptText("Delivery man/woman");
             cbAssignTo.getItems().addAll(cliente.findUsersByPrivilege(Privilege.USER));
             cbAssignTo.setOnAction((Event ev) -> {
-                delivery =
-                        (User) cbAssignTo.getSelectionModel().getSelectedItem();
+                delivery
+                        = (User) cbAssignTo.getSelectionModel().getSelectedItem();
             });
         } catch (Exception ex) {
             Logger.getLogger(FXMLDocumentAssignRouteController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
     /**
-     * This method is launched when the person wants to save the route. This will
-     * only be saved if all the data requested is filled. The route will be sent
-     * to the database to save it for it to be used later on.
-     * @param event 
+     * This method is launched when the person wants to save the route. This
+     * will only be saved if all the data requested is filled. The route will be
+     * sent to the database to save it for it to be used later on.
+     *
+     * @param event
      */
     @FXML
-    private void handleSaveButtonAction(ActionEvent event){
-        if(delivery == null){
-            Alert alert=new Alert(Alert.AlertType.ERROR,
-                            "You haven't entered the user!!",
-                            ButtonType.OK);
+    private void handleSaveButtonAction(ActionEvent event) {
+        if (delivery == null) {
+            Alert alert = new Alert(Alert.AlertType.ERROR,
+                    "You haven't entered the user!!",
+                    ButtonType.OK);
             alert.showAndWait();
-        }else{
+        } else {
             route.setAssignedTo(delivery);
-            Alert alert=new Alert(Alert.AlertType.CONFIRMATION,
-                            "The route has been assigned.",
-                            ButtonType.OK);
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION,
+                    "The route has been assigned.",
+                    ButtonType.OK);
             alert.showAndWait();
-            try{
+            try {
                 route.setCoordinates(null);
                 cliente.editRoute(route);
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("Route Info.fxml"));
@@ -135,7 +130,7 @@ public class FXMLDocumentAssignRouteController {
                 try {
                     root = (Parent) loader.load();
                 } catch (IOException ex) {
-                    LOGGER.severe("Error: "+ex.getLocalizedMessage());
+                    LOGGER.severe("Error: " + ex.getLocalizedMessage());
                 }
                 RouteInfoController viewController = loader.getController();
                 viewController.setRoute(route);
@@ -143,20 +138,22 @@ public class FXMLDocumentAssignRouteController {
                 stage.initModality(Modality.NONE);
                 viewController.setUser(user);
                 viewController.setStage(stage);
-                LOGGER.warning("Parent root: "+root);
+                LOGGER.warning("Parent root: " + root);
                 viewController.initStage(root);
                 this.stage.close();
-            }catch(Exception ex){
-                LOGGER.severe("Error: "+ex.getLocalizedMessage());
+            } catch (Exception ex) {
+                LOGGER.severe("Error: " + ex.getLocalizedMessage());
                 alert = new Alert(Alert.AlertType.ERROR, "Unexpected error happened");
                 alert.showAndWait();
             }
         }
-        
+
     }
-    
+
     /**
-     * This method handles the actions when the user click the close button of the window
+     * This method handles the actions when the user click the close button of
+     * the window
+     *
      * @param event Object of type WindowEvent
      */
     public void handleWindowClosing(WindowEvent event) {
@@ -164,16 +161,16 @@ public class FXMLDocumentAssignRouteController {
         alert.setTitle("Close");
         alert.setHeaderText("Are you sure that you want to discard the changes?");
         Optional<ButtonType> okButton = alert.showAndWait();
-        if (okButton.isPresent() && okButton.get() == ButtonType.CANCEL) {    
+        if (okButton.isPresent() && okButton.get() == ButtonType.CANCEL) {
             event.consume();
-        }else if(okButton.get()==ButtonType.YES){
-            try{
+        } else if (okButton.get() == ButtonType.OK) {
+            try {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("Route Info.fxml"));
                 Parent root = null;
                 try {
                     root = (Parent) loader.load();
                 } catch (IOException ex) {
-                    LOGGER.severe("Error: "+ex.getLocalizedMessage());
+                    LOGGER.severe("Error: " + ex.getLocalizedMessage());
                 }
                 RouteInfoController viewController = loader.getController();
                 Stage stage = new Stage();
@@ -183,28 +180,33 @@ public class FXMLDocumentAssignRouteController {
                 viewController.setStage(stage);
                 viewController.initStage(root);
                 this.stage.close();
-            }catch(Exception ex){
-                LOGGER.severe("Error: "+ex.getLocalizedMessage());
+            } catch (Exception ex) {
+                LOGGER.severe("Error: " + ex.getLocalizedMessage());
                 alert = new Alert(Alert.AlertType.ERROR, "Unexpected error happened");
                 alert.showAndWait();
             }
         }
     }
-    
-    public Route getRoute(){
-        return this.route;
+
+    // Setters
+    public void setStage(Stage stage) {
+        this.stage = stage;
     }
-    
-    public void setRoute(Route route){
+
+    public void setRoute(Route route) {
         this.route = route;
     }
-    
-    public User getUser(){
-        return this.user;
-    }
-    
-    public void setUser(User user){
+
+    public void setUser(User user) {
         this.user = user;
     }
-    
+
+    public Route getRoute() {
+        return this.route;
+    }
+
+    public User getUser() {
+        return this.user;
+    }
+
 }

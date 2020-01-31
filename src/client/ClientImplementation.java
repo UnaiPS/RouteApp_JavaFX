@@ -1,15 +1,7 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package client;
 
 import encryption.Encrypt;
-import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
 import java.net.URL;
 import java.sql.Time;
 import java.time.Instant;
@@ -18,7 +10,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Scanner;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.geometry.Insets;
 import javafx.scene.control.Alert;
@@ -34,7 +25,6 @@ import javax.ws.rs.NotFoundException;
 import javax.ws.rs.ServiceUnavailableException;
 import javax.ws.rs.core.GenericType;
 import model.Coordinate;
-import model.Coordinate_Route;
 import model.Direction;
 import model.FullRoute;
 import model.Privilege;
@@ -50,6 +40,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 /**
+ * The implemetation of the Client Interface.
  *
  * @author Jon Calvo Gaminde
  */
@@ -66,12 +57,12 @@ public class ClientImplementation implements Client {
     private final String HERE_CODE = properties.getString("hereApiCode");
     private final String SERVER_IP = properties.getString("serverIp");
     private final String SERVER_PORT = properties.getString("serverPort");
-    
-    @Override
-    public void setCode(String code) {
-        this.code = code;
-    }
 
+    //Constructors
+    /**
+     * This constructor creates the connection URL using the data stored in the
+     * properties file.
+     */
     public ClientImplementation() {
         code = "";
         String baseURI = "http://" + SERVER_IP + ":" + SERVER_PORT + "/RouteApp_Server/webresources";
@@ -80,11 +71,27 @@ public class ClientImplementation implements Client {
         clientUser = new ClientUser(baseURI);
     }
 
+    //Setters
+    @Override
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    //Getters
+    /**
+     * This getters gets a valit Session code with the client code.
+     *
+     * @return A newly created Session code.
+     */
     public String getSessionCode() {
         String fullCode = code + Time.from(Instant.now()).getTime();
         return Encrypt.cifrarTexto(fullCode);
     }
-    
+
+    /**
+     * This methods creates a dialog that the user must use to login again if he
+     * has been inative for too long.
+     */
     private void reLogin() {
         TextInputDialog dialog = new TextInputDialog("");
         dialog.setTitle("Re-login requiered");
@@ -96,29 +103,31 @@ public class ClientImplementation implements Client {
         PasswordField pf = new PasswordField();
         pf.setPromptText("Password");
 
-
         HBox hBox = new HBox();
         hBox.getChildren().add(tf);
         hBox.getChildren().add(pf);
         hBox.setPadding(new Insets(20));
 
         dialog.setResultConverter(dialogButton -> {
-        if (dialogButton == ButtonType.OK ) {
-            return tf.getText().length() + tf.getText() + pf.getText();
-        } else
-            return null;
+            if (dialogButton == ButtonType.OK) {
+                return tf.getText().length() + tf.getText() + pf.getText();
+            } else {
+                return null;
+            }
         });
 
         dialog.getDialogPane().setContent(hBox);
         Optional<String> loginResult = dialog.showAndWait();
-        if (loginResult.isPresent()){
+
+        // The user is given a choice between two options: he must login or close the application.
+        if (loginResult.isPresent()) {
             User loginData = new User();
             int loginLegth = Character.getNumericValue(loginResult.get().charAt(0));
-            loginData.setLogin(loginResult.get().substring(1, loginLegth+1));
-            loginData.setPassword(loginResult.get().substring(loginLegth+1));
+            loginData.setLogin(loginResult.get().substring(1, loginLegth + 1));
+            loginData.setPassword(loginResult.get().substring(loginLegth + 1));
             try {
                 login(loginData);
-            } catch(Exception ex) {
+            } catch (Exception ex) {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("Error");
                 alert.setHeaderText(ex.getMessage());
@@ -133,11 +142,17 @@ public class ClientImplementation implements Client {
                 System.exit(0);
             }
         }
-        
-        
+
     }
 
     //Route ClientImplementation
+    /**
+     * A method that inserts a route in the server database.
+     *
+     * @param fullRoute The route to insert (includes the directions).
+     * @throws Exception An Exception with a message ready to be show to the
+     * user.
+     */
     @Override
     public void createRoute(FullRoute fullRoute) throws Exception {
         try {
@@ -154,6 +169,13 @@ public class ClientImplementation implements Client {
         }
     }
 
+    /**
+     * A method that edits an existent route in the server database.
+     *
+     * @param route The new route data.
+     * @throws Exception An Exception with a message ready to be show to the
+     * user.
+     */
     @Override
     public void editRoute(Route route) throws Exception {
         try {
@@ -170,6 +192,14 @@ public class ClientImplementation implements Client {
         }
     }
 
+    /**
+     * A method that finds a specific route in the database by the unique id.
+     *
+     * @param routeId The id of the wanted route.
+     * @return The wanted route, or null if it was not found.
+     * @throws Exception An Exception with a message ready to be show to the
+     * user.
+     */
     @Override
     public Route findRoute(String routeId) throws Exception {
         Route result = null;
@@ -188,11 +218,19 @@ public class ClientImplementation implements Client {
         return result;
     }
 
+    /**
+     * A method that gets all routes from the database.
+     *
+     * @return A list containing all the routes.
+     * @throws Exception An Exception with a message ready to be show to the
+     * user.
+     */
     @Override
     public List<Route> findAllRoutes() throws Exception {
         List<Route> result = null;
         try {
-            result = clientRoute.findAll(getSessionCode(), new GenericType<List<Route>>() {});
+            result = clientRoute.findAll(getSessionCode(), new GenericType<List<Route>>() {
+            });
         } catch (NotAuthorizedException ex) {
             reLogin();
             result = findAllRoutes();
@@ -206,11 +244,21 @@ public class ClientImplementation implements Client {
         return result;
     }
 
+    /**
+     * A method that gets all routes assigned to an specific user from the
+     * database.
+     *
+     * @param userId The user id whose assigned routes we want to obtain.
+     * @return A list containing all routes assigned to the user
+     * @throws Exception An Exception with a message ready to be show to the
+     * user.
+     */
     @Override
     public List<Route> findRoutesByAssignedTo(String userId) throws Exception {
         List<Route> result = null;
         try {
-            result = clientRoute.findByAssignedTo(getSessionCode(), new GenericType<List<Route>>() {}, userId);
+            result = clientRoute.findByAssignedTo(getSessionCode(), new GenericType<List<Route>>() {
+            }, userId);
         } catch (NotAuthorizedException ex) {
             reLogin();
             findRoutesByAssignedTo(userId);
@@ -224,6 +272,13 @@ public class ClientImplementation implements Client {
         return result;
     }
 
+    /**
+     * A method that deletes an existent route in the server database.
+     *
+     * @param routeId The id of the unwanted route.
+     * @throws Exception An Exception with a message ready to be show to the
+     * user.
+     */
     @Override
     public void removeRoute(String routeId) throws Exception {
         try {
@@ -241,7 +296,15 @@ public class ClientImplementation implements Client {
     }
 
     //Coordinate ClientImplementation
-    
+    /**
+     * A method that finds a specific coordinate in the database by the unique
+     * id.
+     *
+     * @param coordinateId The id of the wanted coordinate.
+     * @return The wanted coordinate, or null if it was not found.
+     * @throws Exception An Exception with a message ready to be show to the
+     * user.
+     */
     @Override
     public Coordinate findCoordinate(String coordinateId) throws Exception {
         Coordinate result = null;
@@ -259,7 +322,15 @@ public class ClientImplementation implements Client {
         }
         return result;
     }
-    
+
+    /**
+     * A method that gets all direction of certain type from the database.
+     *
+     * @param type The type of the directions wanted.
+     * @return A list containing all the directions of that type.
+     * @throws Exception An Exception with a message ready to be show to the
+     * user.
+     */
     @Override
     public List<Direction> findDirectionsByType(Type type) throws Exception {
         List<Direction> result = null;
@@ -279,6 +350,15 @@ public class ClientImplementation implements Client {
         return result;
     }
 
+    /**
+     * A method that gets all direction present in a specific route from the
+     * database.
+     *
+     * @param routeId The id of the route whose directions we want.
+     * @return A list containing all the directions present in the route.
+     * @throws Exception An Exception with a message ready to be show to the
+     * user.
+     */
     @Override
     public List<Direction> findDirectionsByRoute(String routeId) throws Exception {
         List<Direction> result = null;
@@ -299,6 +379,13 @@ public class ClientImplementation implements Client {
     }
 
     //User ClientImplementation
+    /**
+     * A method that inserts a user in the server database.
+     *
+     * @param user The user to insert.
+     * @throws Exception An Exception with a message ready to be show to the
+     * user.
+     */
     @Override
     public void createUser(User user) throws Exception {
         try {
@@ -311,6 +398,13 @@ public class ClientImplementation implements Client {
         }
     }
 
+    /**
+     * A method that edits an existent route in the server database.
+     *
+     * @param user The new user data.
+     * @throws Exception An Exception with a message ready to be show to the
+     * user.
+     */
     @Override
     public void editUser(User user) throws Exception {
         try {
@@ -327,6 +421,14 @@ public class ClientImplementation implements Client {
         }
     }
 
+    /**
+     * A method that finds a specific user in the database by the unique id.
+     *
+     * @param userId The id of the wanted user.
+     * @return The wanted user, or null if it was not found.
+     * @throws Exception An Exception with a message ready to be show to the
+     * user.
+     */
     @Override
     public User findUser(String userId) throws Exception {
         User result = null;
@@ -345,6 +447,13 @@ public class ClientImplementation implements Client {
         return result;
     }
 
+    /**
+     * A method that gets all users from the database.
+     *
+     * @return A list containing all the users.
+     * @throws Exception An Exception with a message ready to be show to the
+     * user.
+     */
     @Override
     public List<User> findAllUsers() throws Exception {
         List<User> result = null;
@@ -364,6 +473,14 @@ public class ClientImplementation implements Client {
         return result;
     }
 
+    /**
+     * A method that finds user in the database by the unique login.
+     *
+     * @param userLogin The login of the user.
+     * @return The user with that login, or null if it does not exists.
+     * @throws Exception An Exception with a message ready to be show to the
+     * user.
+     */
     @Override
     public User findUserByLogin(String userLogin) throws Exception {
         User result = null;
@@ -382,6 +499,15 @@ public class ClientImplementation implements Client {
         return result;
     }
 
+    /**
+     * A method that gets all users of certain privilege level from the
+     * database.
+     *
+     * @param privilege The privilege level of the users wanted.
+     * @return A list containing all the users of that privilege level.
+     * @throws Exception An Exception with a message ready to be show to the
+     * user.
+     */
     @Override
     public List<User> findUsersByPrivilege(Privilege privilege) throws Exception {
         List<User> result = null;
@@ -401,6 +527,13 @@ public class ClientImplementation implements Client {
         return result;
     }
 
+    /**
+     * A method that deletes an existent user in the server database.
+     *
+     * @param userId The id of the unwanted user.
+     * @throws Exception An Exception with a message ready to be show to the
+     * user.
+     */
     @Override
     public void removeUser(String userId) throws Exception {
         try {
@@ -417,6 +550,15 @@ public class ClientImplementation implements Client {
         }
     }
 
+    /**
+     * A method that checks the login and the password of a user and returns its
+     * session, setting its code on the client.
+     *
+     * @param loginData An user with the login and the password.
+     * @return A Session with the session code and the data of the user.
+     * @throws Exception An Exception with a message ready to be show to the
+     * user.
+     */
     @Override
     public User login(User loginData) throws Exception {
         Session result = null;
@@ -436,10 +578,24 @@ public class ClientImplementation implements Client {
         return result.getLogged();
     }
 
+    /**
+     * A method that asks the server to send a new password for the user to his
+     * email.
+     *
+     * @param userData An user with the login and data of the user.
+     * @throws Exception An Exception with a message ready to be show to the
+     * user.
+     */
     @Override
     public void forgottenPassword(User userData) throws Exception {
         try {
             clientUser.forgottenpasswd(userData.getEmail(), userData.getLogin());
+        } catch (NotFoundException ex) {
+            throw new Exception("No user with that login found.");
+        } catch (NotAuthorizedException ex) {
+            throw new Exception("The data was wrong.");
+        } catch (ForbiddenException ex) {
+            throw new Exception("The password was changed or restored recently, you must wait some time to restore password again.");
         } catch (InternalServerErrorException ex) {
             throw new Exception("Unexpected error happened.");
         } catch (ServiceUnavailableException ex) {
@@ -447,6 +603,15 @@ public class ClientImplementation implements Client {
         }
     }
 
+    /**
+     * A method that asks the server to send a confirmation code for the user to
+     * his email, and a hashed version to the client to compare.
+     *
+     * @param user The user that will receive de email.
+     * @return The hashed code to compare
+     * @throws Exception An Exception with a message ready to be show to the
+     * user.
+     */
     @Override
     public String emailConfirmation(User user) throws Exception {
         String result = null;
@@ -464,18 +629,27 @@ public class ClientImplementation implements Client {
         }
         return result;
     }
-    
-    //Remote API
 
+    //Remote API
+    /**
+     * A method that asks the external API data about a place and creates a
+     * direction of that point.
+     *
+     * @param place The string containing the name of the place.
+     * @param type The type of direction.
+     * @return The direction created with the data.
+     * @throws LogicBusinessException An Exception with a message ready to be
+     * show to the user.
+     */
     @Override
-    public Direction getDirection(String sitio, Type type) throws LogicBusinessException {
+    public Direction getDirection(String place, Type type) throws LogicBusinessException {
         Direction direction = new Direction();
         try {
             String inline = "";
 
-            sitio = sitio.replace(" ", "%20");
-            sitio = sitio.replace("ñ", "n");
-            URL url = new URL("https://geocoder.api.here.com/6.2/geocode.json?searchtext=" + sitio + "&app_id=" + HERE_ID + "&app_code=" + HERE_CODE + "&language=en-en");
+            place = place.replace(" ", "%20");
+            place = place.replace("ñ", "n");
+            URL url = new URL("https://geocoder.api.here.com/6.2/geocode.json?searchtext=" + place + "&app_id=" + HERE_ID + "&app_code=" + HERE_CODE + "&language=en-en");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             conn.connect();
@@ -487,8 +661,6 @@ public class ClientImplementation implements Client {
                 while (sc.hasNext()) {
                     inline += sc.nextLine();
                 }
-                System.out.println("\nJSON data in string format");
-                System.out.println(inline);
                 sc.close();
 
                 JSONParser parse = new JSONParser();
@@ -517,7 +689,7 @@ public class ClientImplementation implements Client {
                 int postalCode = 0;
                 try {
                     postalCode = Integer.parseInt(cp);
-                } catch (NumberFormatException ex){
+                } catch (NumberFormatException ex) {
                     postalCode = 0;
                     LOGGER.warning("Foreign postal code.");
                 }
@@ -529,32 +701,28 @@ public class ClientImplementation implements Client {
 
                 direction.setHouseNumber((String) objAddress.get("HouseNumber"));
             }
-        } catch (MalformedURLException ex) {
-            LOGGER.log(Level.SEVERE,
-                    "External web service: Exception getting the direction, {0}",
-                    ex.getMessage());
-            throw new LogicBusinessException("Error getting delivery users list:\n" + ex
-                    .getMessage());
-        } catch (IOException ex) {
-            LOGGER.log(Level.SEVERE,
-                    "Error: Exception reading/writing, {0}",
-                    ex.getMessage());
-            throw new LogicBusinessException("Error writing o reading file:\n" + ex
-                    .getMessage());
-        } catch (org.json.simple.parser.ParseException ex) {
-            LOGGER.log(Level.SEVERE,
-                    "JSON Parser: Exception getting the direction, {0}",
-                    ex.getMessage());
-            throw new LogicBusinessException("Error parsing data:\n" + ex
-                    .getMessage());
+        } catch (Exception ex) {
+            LOGGER.severe("External web service: Exception getting the direction " + ex.getMessage());
+            throw new LogicBusinessException("Error getting the direction.");
         }
         return direction;
     }
 
+    /**
+     * A method that asks the external API data about a route and creates a
+     * route object with it.
+     *
+     * @param coords An array of Strings containing the directions for the
+     * route.
+     * @param route A route object with data about route mode.
+     * @return The route object with the route coordinates.
+     * @throws LogicBusinessException An Exception with a message ready to be
+     * show to the user.
+     */
     @Override
     public Route getRoute(ArrayList<String> coords, Route route) throws LogicBusinessException {
         String mode = "";
-        String consulta = "";
+        String query = "";
 
         if (route.getMode() == Mode.FASTEST) {
             mode = "fastest";
@@ -581,13 +749,13 @@ public class ClientImplementation implements Client {
         }
 
         for (int i = 0; i < coords.size(); i++) {
-            consulta += "&waypoint" + i + "=" + coords.get(i);
+            query += "&waypoint" + i + "=" + coords.get(i);
         }
-        consulta += "&mode=" + mode;
+        query += "&mode=" + mode;
 
         try {
             String inline = "";
-            URL url = new URL("https://route.api.here.com/routing/7.2/calculateroute.json?app_id=" + HERE_ID + "&app_code=" + HERE_CODE + consulta);
+            URL url = new URL("https://route.api.here.com/routing/7.2/calculateroute.json?app_id=" + HERE_ID + "&app_code=" + HERE_CODE + query);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             conn.connect();
@@ -599,8 +767,6 @@ public class ClientImplementation implements Client {
                 while (sc.hasNext()) {
                     inline += sc.nextLine();
                 }
-                System.out.println("\nJSON data in string format");
-                System.out.println(inline);
                 sc.close();
 
                 JSONParser parse = new JSONParser();
@@ -613,26 +779,33 @@ public class ClientImplementation implements Client {
                 String trafficTime = "0";
                 if (route.getTransportMode() != TransportMode.PEDESTRIAN) {
                     trafficTime = (String) objSummary.get("trafficTime").toString();
-                } 
+                }
                 String baseTime = (String) objSummary.get("baseTime").toString();
 
                 int time = Integer.parseInt(baseTime) + Integer.parseInt(trafficTime);
                 Double distance2 = Double.parseDouble(distance);
                 route.setEstimatedTime(time);
                 route.setTotalDistance(distance2);
-                
-                
+
             }
-        } catch (MalformedURLException ex) {
-            Logger.getLogger(ClientImplementation.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ProtocolException | org.json.simple.parser.ParseException ex) {
-            Logger.getLogger(ClientImplementation.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(ClientImplementation.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            LOGGER.severe("External web service: Exception getting the route " + ex.getMessage());
+            throw new LogicBusinessException("Error getting the route.");
         }
         return route;
     }
-    
+
+    /**
+     * A method that gets from the external API the cost matrix of coordinates,
+     * and returns it.
+     *
+     * @param coords The coordinates to make the matrix.
+     * @param mode The mode to calculate the cost values.
+     * @param transport The transport for which calculate the cost values.
+     * @return The cost matrix of the coordinates.
+     * @throws LogicBusinessException An Exception with a message ready to be
+     * show to the user.
+     */
     @Override
     public int[][] getMatrix(ArrayList<String> coords, Mode mode, TransportMode transport) throws LogicBusinessException {
         String extra;
@@ -679,8 +852,6 @@ public class ClientImplementation implements Client {
                 while (sc.hasNext()) {
                     inline += sc.nextLine();
                 }
-                System.out.println("\nJSON data in string format");
-                System.out.println(inline);
                 sc.close();
 
                 JSONParser parse = new JSONParser();
@@ -696,31 +867,10 @@ public class ClientImplementation implements Client {
                 }
 
             }
-        } catch (MalformedURLException ex) {
-            Logger.getLogger(ClientImplementation.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ProtocolException | org.json.simple.parser.ParseException ex) {
-            Logger.getLogger(ClientImplementation.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(ClientImplementation.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            LOGGER.severe("External web service: Exception getting the matrix " + ex.getMessage());
+            throw new LogicBusinessException("Error getting the route.");
         }
         return matrix;
     }
-
-//    @Override
-//    public int restorePassword(String email, String login) throws LogicBusinessException {
-//        try {
-//            
-//            int result = clientUser.forgottenpasswd(int.class, email, login);
-//            return result;
-//        } catch (Exception e) {
-//            LOGGER.log(Level.SEVERE,
-//                    "UsersManager: Exception restoring password, {0}",
-//                    e.getMessage());
-//            throw new LogicBusinessException("Error restoring the password:\n" + e
-//                    .getMessage());
-//        }
-//
-//    }
-
-    
 }

@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package view;
 
 import client.Client;
@@ -36,10 +31,11 @@ import org.glassfish.hk2.utilities.reflection.Logger;
 
 /**
  * FXML Controller class for the Login window
+ *
  * @author Jon Calvo Gaminde
  */
 public class FXMLDocumentControllerLogin {
-    
+
     @FXML
     private Button btnLogin;
     @FXML
@@ -50,22 +46,20 @@ public class FXMLDocumentControllerLogin {
     private TextField txtLogin;
     @FXML
     private PasswordField txtPassword;
-    
+
     private Stage stage;
-    
+
     User user = new User();
-    
+
     Client client = ClientFactory.getClient();
-    
 
     public void setStage(Stage stage) {
         this.stage = stage;
     }
 
-    
-    
     /**
      * Initializes the stage
+     *
      * @param root The Parent of the scene
      */
     public void initStage(Parent root) {
@@ -75,22 +69,23 @@ public class FXMLDocumentControllerLogin {
         btnLogin.setOnAction(this::handleLoginButtonAction);
         btnSignUp.setOnAction(this::handleSignUpButtonAction);
         btnRestorePassword.setOnAction(this::handleRestorePasswordButtonAction);
-        
-        Scene scene = new Scene (root);
+
+        Scene scene = new Scene(root);
         stage.setScene(scene);
         stage.show();
-        
+
     }
-    
+
     /**
      * This method handle the actions when the window shows
+     *
      * @param event Object of type WindowEvent
      */
     public void handleWindowShowing(WindowEvent event) {
         stage.setResizable(false);
         addTextLimiter(txtLogin, 30);
         addTextLimiter(txtPassword, 50);
-        
+
         btnLogin.setMnemonicParsing(true);
         btnLogin.setText("_Log in");
         btnSignUp.setMnemonicParsing(true);
@@ -98,9 +93,11 @@ public class FXMLDocumentControllerLogin {
         btnRestorePassword.setMnemonicParsing(true);
         btnRestorePassword.setText("_Restore password");
     }
-    
+
     /**
-     * This method handle the actions when the user click the close button of the window
+     * This method handle the actions when the user click the close button of
+     * the window
+     *
      * @param event Object of type WindowEvent
      */
     public void handleWindowClosing(WindowEvent event) {
@@ -108,7 +105,7 @@ public class FXMLDocumentControllerLogin {
         alert.setTitle("Close");
         alert.setHeaderText("Are you sure that you want to close the application?");
         Optional<ButtonType> okButton = alert.showAndWait();
-        if (okButton.isPresent() && okButton.get() == ButtonType.CANCEL) {    
+        if (okButton.isPresent() && okButton.get() == ButtonType.CANCEL) {
             event.consume();
         }
     }
@@ -116,6 +113,7 @@ public class FXMLDocumentControllerLogin {
     /**
      * This will try to log in the user. Controlls wether the data entered is
      * valid or not.
+     *
      * @param event The clicking event
      */
     @FXML
@@ -137,7 +135,7 @@ public class FXMLDocumentControllerLogin {
                 user.setLogin(login);
                 user.setPassword(passwd);
                 user = client.login(user);
-                
+
                 if (user.getPrivilege().equals(Privilege.ADMIN)) {
 
                     Parent root;
@@ -150,48 +148,25 @@ public class FXMLDocumentControllerLogin {
                     viewController.setStage(secondStage);
                     viewController.initStage(root);
 
-
                     txtLogin.clear();
                     txtPassword.clear();
                 } else {
                     showError("Non-admin users can only log in the mobile version of the app.");
                 }
-            
-                
-            
+
             } catch (Exception e) {
                 showError(e.getLocalizedMessage());
-                java.util.logging.Logger.getLogger(FXMLDocumentControllerLogin.class.getName()).log(Level.SEVERE, null, e);
-            /*} catch (NoThreadAvailableException e) {
-                Alert alert = new Alert(AlertType.ERROR);
-                alert.setTitle("Error");
-                alert.setHeaderText(null);
-                alert.setContentText("The server is overloaded, try again later.");
+                java.util.logging.Logger.getLogger(FXMLDocumentControllerLogin.class.getName()).severe(e.getLocalizedMessage());
+            }
 
-                alert.showAndWait();
-            } catch (BadPasswordException e) {
-                Alert alert = new Alert(AlertType.ERROR);
-                alert.setTitle("Error");
-                alert.setHeaderText(null);
-                alert.setContentText("The password you have entered is not correct.");
-
-                alert.showAndWait();
-            } catch(Exception e){
-                Alert alert = new Alert(AlertType.ERROR);
-                alert.setTitle("Error");
-                alert.setHeaderText(null);
-                alert.setContentText("An error has ocurred.");
-
-                alert.showAndWait();
-            */}
-           
         }
     }
-    
-  /**
-   * This will try to open the sign up window.
-   * @param event The clicking event
-   */
+
+    /**
+     * This will try to open the sign up window.
+     *
+     * @param event The clicking event
+     */
     @FXML
     private void handleSignUpButtonAction(ActionEvent event) {
         try {
@@ -207,11 +182,12 @@ public class FXMLDocumentControllerLogin {
             showError("An error has ocurred.");
         }
     }
-    
+
     /**
-   * This will try to open the restore password window.
-   * @param event The clicking event
-   */
+     * This will try to open the restore password window.
+     *
+     * @param event The clicking event
+     */
     @FXML
     private void handleRestorePasswordButtonAction(ActionEvent event) {
         try {
@@ -232,14 +208,19 @@ public class FXMLDocumentControllerLogin {
             alert.showAndWait();
         }
     }
-    
+
+    /**
+     * A method that creates an error Alert with the inputed text.
+     *
+     * @param errorText The text to show.
+     */
     private void showError(String errorText) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Error");
         alert.setHeaderText(errorText);
         alert.showAndWait();
     }
-    
+
     /**
      * Limits the login(username) textfield.
      *
