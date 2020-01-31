@@ -23,6 +23,7 @@ public class Algorithm {
         minimumCost = Integer.MAX_VALUE;
         matrix = coordinateMatrix;
         points = coordinateMatrix.length;
+        // The route must start with the origin, index 0.
         anotherLevel(0, "0");
         return route;
     }
@@ -36,17 +37,22 @@ public class Algorithm {
      */
     private static void anotherLevel(int lastCost, String oldHistory) {
         for (int i = 1; i < points; i++) {
+            // Get the current possible route.
             int currentCost = lastCost;
             String history = oldHistory;
+            // It only needs to be one time in each direction.
             if (history.contains(Integer.toString(i))) {
                 continue;
             }
             currentCost += matrix[Character.getNumericValue(history.charAt(history.length() - 1))][i];
+            // Cut this route branch if it is too long.
             if (currentCost < minimumCost) {
                 history += Integer.toString(i);
+                // If it has not been in every direction, the method enters another level.
                 if (history.length() < points) {
                     anotherLevel(currentCost, history);
                 } else {
+                    // The new best route is saved.
                     minimumCost = currentCost;
                     route = history;
                 }

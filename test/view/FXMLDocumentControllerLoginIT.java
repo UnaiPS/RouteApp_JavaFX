@@ -27,7 +27,7 @@ import static org.testfx.matcher.base.NodeMatchers.isVisible;
 
 /**
  * The integration test for the FXMLDocumentControllerLogin.
- * @author Jon Calvo
+ * @author Jon Calvo Gaminde
  */
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
