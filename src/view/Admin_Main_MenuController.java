@@ -26,6 +26,7 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.PasswordField;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextInputDialog;
@@ -162,11 +163,10 @@ public class Admin_Main_MenuController {
 
         colCreatedBy.setCellValueFactory(new PropertyValueFactory<>("createdBy"));
         colEnded.setCellValueFactory(new PropertyValueFactory<>("ended"));
-        colEstimatedTime.setCellValueFactory(new PropertyValueFactory<>("estimatedTime"));
+        colEstimatedTime.setCellValueFactory(new PropertyValueFactory<>("formattedEstimatedTime"));
         colMode.setCellValueFactory(new PropertyValueFactory<>("mode"));
         colName.setCellValueFactory(new PropertyValueFactory<>("name"));
         colStarted.setCellValueFactory(new PropertyValueFactory<>("started"));
-        //colStarted.setCellFactory(tc -> new CheckBoxTableCell<>());
         colTotalDistance.setCellValueFactory(new PropertyValueFactory<>("totalDistance"));
         colTraffMode.setCellValueFactory(new PropertyValueFactory<>("trafficMode"));
         colTransMode.setCellValueFactory(new PropertyValueFactory<>("transportMode"));
